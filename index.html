@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MotionMorphJs Demos</title>
+  <meta name="description" content="Scroll-driven morph effects between DOM content. No dependencies.">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/styles.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg-app); color: var(--text-primary);
+      font-family: var(--font-body); line-height: 1.55;
+    }
+    main { max-width: 880px; margin: 0 auto; padding: 72px 16px 48px; }
+    .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ng-cyan); }
+    h1 { margin: 12px 0 16px; font-family: var(--font-display); font-weight: 700; font-size: clamp(36px, 6vw, 56px); line-height: 1; letter-spacing: .04em; text-transform: uppercase; }
+    .lead { margin: 0 0 40px; max-width: 620px; font-size: 17px; color: var(--text-secondary); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .card {
+      display: flex; flex-direction: column; gap: 10px; padding: 24px; text-decoration: none; color: inherit;
+      background: var(--surface-card); border: 1px solid var(--border-default); border-radius: 4px;
+      transition: border-color .2s, box-shadow .2s, transform .2s;
+    }
+    .card:hover, .card:focus-visible { border-color: var(--ng-cyan); box-shadow: 0 0 0 1px var(--ng-cyan-a40), 0 0 24px var(--ng-cyan-a20); transform: translateY(-2px); outline: none; }
+    .card .num { font-family: var(--font-mono); font-size: 12px; color: var(--ng-magenta); }
+    .card h2 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 24px; letter-spacing: .04em; text-transform: uppercase; }
+    .card p { margin: 0; font-size: 15px; color: var(--text-secondary); }
+    .card .go { margin-top: auto; padding-top: 8px; font-family: var(--font-mono); font-size: 13px; color: var(--ng-cyan); }
+    footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border-default); font-size: 14px; color: var(--text-muted); }
+    footer a { color: var(--link); }
+    footer a:hover { color: var(--link-hover); }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">// MotionMorphJs · no dependencies</div>
+    <h1>Morph between anything</h1>
+    <p class="lead">Scroll-driven effects that carry content from one element to another. Each effect is a single script file. Pick a demo to see them run.</p>
+
+    <div class="grid">
+      <a class="card" href="Motion%20Lab.dc.html">
+        <span class="num">01 · Explorer</span>
+        <h2>Motion Lab</h2>
+        <p>Try ParticleMorph and OrigamiMorph, tune every option with live controls, and copy a ready-made code snippet.</p>
+        <span class="go">Open demo →</span>
+      </a>
+      <a class="card" href="Paper%20Plane%20Page.dc.html">
+        <span class="num">02 · Example page</span>
+        <h2>Paper Plane Page</h2>
+        <p>A landing page where content folds into a paper plane and flies between sections as you scroll.</p>
+        <span class="go">Open demo →</span>
+      </a>
+    </div>
+
+    <footer>
+      Source, docs and licence on <a href="https://github.com/davidpetergosling/motion-morph-js">GitHub</a>.
+    </footer>
+  </main>
+</body>
+</html>

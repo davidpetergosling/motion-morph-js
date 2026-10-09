@@ -9,6 +9,8 @@ Scroll-driven morph effects that move content from one DOM element to another. E
 
 Both effects (v1.2.0) can be scrubbed by scroll, run on a timer, or driven by hand. Both also respect `prefers-reduced-motion` by default.
 
+**[▶ Live demos](https://davidpetergosling.github.io/motion-morph-js/)**
+
 ## Quick start
 
 ```html
@@ -105,7 +107,7 @@ To write a custom `motion`, pass a function that changes `q.x` / `q.y`. It recei
 - **Motion Lab.dc.html** is an effect explorer. Pick an effect, tune its options with live controls, then copy the generated usage snippet, browse the options and source, or download the file.
 - **Paper Plane Page.dc.html** is a sample landing page that uses OrigamiMorph between sections.
 
-Both pages are built with the Neon Grid design system in `_ds/` and the `support.js` runtime. `image-slot.js` provides a drop-in `<image-slot>` image placeholder. To view a page, serve the folder over HTTP rather than opening it from `file://`, because the pages fetch local files:
+You can try both pages on the [live demo site](https://davidpetergosling.github.io/motion-morph-js/). Both are built with the Neon Grid design system in `_ds/` and the `support.js` runtime. `image-slot.js` provides a drop-in `<image-slot>` image placeholder. To run them locally, serve the folder over HTTP rather than opening it from `file://`, because the pages fetch local files:
 
 ```sh
 npx serve .
@@ -120,5 +122,6 @@ effects/            the morph libraries (standalone, no dependencies)
 _ds/                Neon Grid design system tokens and bundle
 support.js          runtime for the .dc.html pages (generated, do not edit)
 image-slot.js       <image-slot> web component
+index.html          demos landing page (GitHub Pages)
 *.dc.html           demo pages
 ```
