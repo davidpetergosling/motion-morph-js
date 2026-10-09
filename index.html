@@ -715,25 +715,115 @@ class Component extends DCLogic {
         ['ease', "'inOut'", 'Grain flight ease.']
       ]
     }, {
-      id: 'pixelsort-morph', name: 'PixelSortMorph', global: 'PixelSortMorph', varName: 'ps', pad: 0,
-      tagline: 'Pixels sort into streaks, slide across and unsort as the next.',
-      desc: 'The source’s pixels are sorted by brightness along each column, starting with the brightest runs, until the content smears into streaks. The streaks slide across with after-images and the target unsorts back into place.',
-      tags: ['Canvas 2D', 'Scroll-driven', 'Pixel sorting', 'Cached levels'],
-      usageCall: "ps.scroll({ from: '#a .card', to: '#b .card' });   // sorts as #b scrolls in",
+      id: 'teleporter-morph', name: 'TeleporterMorph', global: 'TeleporterMorph', varName: 'tp', pad: 6,
+      tagline: 'Beam out in a shimmer of sparkles, beam in at the next.',
+      desc: 'A column of light switches on over the source. The content shimmers in flickering bands, washes into the beam colour and dissolves into twinkling sparkles as the beam powers down. The same plays in reverse at the target.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'Light beam', 'Sparkles'],
+      usageCall: "tp.scroll({ from: '#a .card', to: '#b .card' });   // beams across as #b scrolls in",
       controls: [
-        { key: 'direction', type: 'select', options: ['down', 'up', 'right', 'left'], def: 'down' },
-        { key: 'threshold', type: 'range', min: 0, max: 0.9, step: 0.05, def: 0.15 },
-        { key: 'stretch', type: 'range', min: 0, max: 2, step: 0.05, def: 0.6 },
-        { key: 'trails', type: 'range', min: 0, max: 8, step: 1, def: 3 },
-        { key: 'ease', type: 'select', options: ['inOut', 'sine', 'out', 'linear'], def: 'inOut' }
+        { key: 'color', type: 'select', options: [{ value: '#9fd8ff', label: 'Ice' }, { value: '#00f0ff', label: 'Cyan' }, { value: '#ff2bd6', label: 'Magenta' }, { value: '#ffd27a', label: 'Gold' }], def: '#9fd8ff' },
+        { key: 'sparkles', type: 'range', min: 0, max: 1200, step: 20, def: 420 },
+        { key: 'sparkleSize', label: 'Sparkle px', type: 'range', min: 1, max: 6, step: 0.1, def: 2.5 },
+        { key: 'shimmer', type: 'range', min: 0, max: 1.5, step: 0.05, def: 1 },
+        { key: 'band', label: 'Band px', type: 'range', min: 1, max: 12, step: 1, def: 3 },
+        { key: 'rise', type: 'range', min: 0, max: 80, step: 2, def: 16 },
+        { key: 'beam', type: 'switch', def: true },
+        { key: 'pads', type: 'switch', def: true }
       ],
       options: [
-        ['direction', "'down'", "Sort direction: 'down' | 'up' | 'right' | 'left'."],
-        ['threshold', '0.15', 'Brightness floor at full sort. Darker pixels never sort.'],
-        ['stretch', '0.6', 'How far streaks run past the element, as a fraction of its size.'],
-        ['trails', '3', 'After-images while the streaks travel.'],
-        ['maxPixels', '120000', 'Per-element pixel budget for sorting.'],
-        ['ease', "'inOut'", 'Sort and travel ease.']
+        ['color', "'#9fd8ff'", 'Beam and sparkle colour.'],
+        ['sparkles', '420', 'Sparkles per element.'],
+        ['sparkleSize', '2.5', 'Sparkle size, px.'],
+        ['shimmer', '1', 'Strength of the flickering bands, 0–1.5.'],
+        ['band', '3', 'Shimmer band height, px.'],
+        ['beam', 'true', 'Column of light over the element.'],
+        ['pads', 'true', 'Bright emitter lines above and below the element.'],
+        ['rise', '16', 'px sparkles drift upward while they hang.'],
+        ['rate', '60', 'Flicker frames over the whole morph.'],
+        ['ease', "'inOut'", 'Content fade ease.']
+      ]
+    }, {
+      id: 'bubble-morph', name: 'BubbleMorph', global: 'BubbleMorph', varName: 'bb', pad: 2,
+      tagline: 'Content floats off in soap bubbles that pop into the next.',
+      desc: 'The source lifts off in soap bubbles, each carrying the piece of content behind it, magnified and wobbling, with an iridescent rim. They float across, the picture inside shifting to the target, rise into place and pop.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'Lens bubbles', 'Pop'],
+      usageCall: "bb.scroll({ from: '#a .card', to: '#b .card' });   // bubbles across as #b scrolls in",
+      controls: [
+        { key: 'bubble', label: 'Bubble px', type: 'range', min: 10, max: 60, step: 1, def: 22 },
+        { key: 'rise', type: 'range', min: 0, max: 300, step: 10, def: 120 },
+        { key: 'wobble', type: 'range', min: 0, max: 3, step: 0.1, def: 1 },
+        { key: 'magnify', type: 'range', min: 0.8, max: 2, step: 0.05, def: 1.15 },
+        { key: 'iridescence', type: 'range', min: 0, max: 1, step: 0.05, def: 0.6 },
+        { key: 'stagger', type: 'range', min: 0, max: 0.5, step: 0.02, def: 0.32 },
+        { key: 'pop', type: 'switch', def: true }
+      ],
+      options: [
+        ['bubble', '22', 'Grid cell size, px. Bubbles are a little larger so they overlap.'],
+        ['rise', '120', 'px bubbles float up as they leave, and rise into place by at the end.'],
+        ['wobble', '1', 'Sideways wander and shape wobble.'],
+        ['magnify', '1.15', 'Lens magnification of the content inside a bubble.'],
+        ['iridescence', '0.6', 'Strength of the rainbow rim.'],
+        ['colors', "['#00f0ff', '#ff2bd6', '#ffe14d']", 'Iridescent rim colours.'],
+        ['stagger', '0.32', 'How spread out departures are. Top rows leave first.'],
+        ['pop', 'true', 'Pop with a ring and droplets on arrival.'],
+        ['ease', "'sine'", 'Flight ease.']
+      ]
+    }, {
+      id: 'electricity-morph', name: 'ElectricityMorph', global: 'ElectricityMorph', varName: 'el', pad: 8,
+      tagline: 'Crackling arcs, then a lightning bolt zaps the content across.',
+      desc: 'The source charges up as arcs crackle across it. A branching lightning bolt strikes from source to target and the source is zapped away, its sparks racing along the bolt. The target flickers on, still crackling, then settles.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'Lightning', 'Repeatable crackle'],
+      usageCall: "el.scroll({ from: '#a h2', to: '#b h2' });   // strikes as #b scrolls in",
+      controls: [
+        { key: 'color', type: 'select', options: [{ value: '#8fd3ff', label: 'Ice' }, { value: '#00f0ff', label: 'Cyan' }, { value: '#ff2bd6', label: 'Magenta' }, { value: '#c9a0ff', label: 'Violet' }], def: '#8fd3ff' },
+        { key: 'arcs', type: 'range', min: 0, max: 30, step: 1, def: 10 },
+        { key: 'branches', type: 'range', min: 0, max: 10, step: 1, def: 3 },
+        { key: 'jag', type: 'range', min: 0.2, max: 2.5, step: 0.1, def: 1 },
+        { key: 'width', type: 'range', min: 0.5, max: 6, step: 0.1, def: 2 },
+        { key: 'sparks', type: 'range', min: 0, max: 400, step: 10, def: 140 },
+        { key: 'rate', label: 'Crackle', type: 'range', min: 10, max: 200, step: 5, def: 50 },
+        { key: 'flash', type: 'switch', def: true }
+      ],
+      options: [
+        ['color', "'#8fd3ff'", 'Electric colour.'],
+        ['arcs', '10', 'Arcs crackling over an element at full charge.'],
+        ['branches', '3', 'Side branches on the main bolt.'],
+        ['jag', '1', 'How jagged the bolts are.'],
+        ['width', '2', 'Bolt core width, px.'],
+        ['sparks', '140', 'Sparks that race along the bolt.'],
+        ['flicker', '1', 'How much the content flickers, 0–1.'],
+        ['flash', 'true', 'Screen flash when the bolt strikes.'],
+        ['rate', '50', 'Bolt redraws over the whole morph. Higher = more crackle while scrubbing.'],
+        ['ease', "'inOut'", 'Content fade ease.']
+      ]
+    }, {
+      id: 'smokebomb-morph', name: 'SmokeBombMorph', global: 'SmokeBombMorph', varName: 'sb', pad: 4,
+      tagline: 'Poof — a smoke bomb hides the content, the next appears as it clears.',
+      desc: 'A smoke bomb goes off on the source: a flash, a spray of sparks and billowing smoke that hides it. A trail of puffs dashes across, a second bomb goes off on the target, and as the smoke clears the target is standing there.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'Textured smoke', 'Flash + sparks'],
+      usageCall: "sb.scroll({ from: '#a .card', to: '#b .card' });   // poofs as #b scrolls in",
+      controls: [
+        { key: 'color', label: 'Smoke', type: 'select', options: [{ value: '#cfcbd9', label: 'Grey' }, { value: '#bfefff', label: 'Ice' }, { value: '#ffc2ef', label: 'Pink' }, { value: '#c8ffd9', label: 'Mint' }], def: '#cfcbd9' },
+        { key: 'puffs', type: 'range', min: 10, max: 160, step: 5, def: 60 },
+        { key: 'size', type: 'range', min: 0.3, max: 2.5, step: 0.05, def: 1 },
+        { key: 'density', type: 'range', min: 0.1, max: 1, step: 0.05, def: 0.85 },
+        { key: 'drift', type: 'range', min: -100, max: 150, step: 5, def: 40 },
+        { key: 'sparks', type: 'range', min: 0, max: 80, step: 2, def: 20 },
+        { key: 'flash', type: 'switch', def: true },
+        { key: 'trail', type: 'switch', def: true }
+      ],
+      options: [
+        ['color', "'#cfcbd9'", 'Smoke colour, light side.'],
+        ['shade', "'#5d5870'", 'Smoke colour, shadow side.'],
+        ['puffs', '60', 'Smoke puffs per bomb.'],
+        ['size', '1', 'Cloud size relative to the element.'],
+        ['density', '0.85', 'Smoke opacity.'],
+        ['drift', '40', 'px the smoke rises as it clears.'],
+        ['flash', 'true', 'Flash when each bomb goes off.'],
+        ['flashColor', "'#ffd9a0'", 'Flash and spark colour.'],
+        ['sparks', '20', 'Sparks sprayed by each bomb.'],
+        ['trail', 'true', 'Trail of puffs dashing from source to target.'],
+        ['ease', "'out'", 'Smoke expansion ease.']
       ]
     }
   ].map((fx, i) => {
