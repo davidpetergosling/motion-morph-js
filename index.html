@@ -570,7 +570,201 @@ class Component extends DCLogic {
         return { progress: p => m.progress(p), invalidate: () => m.invalidate(), destroy: () => wm.destroy() };
       }
     }
-  }];
+  }, ...[
+    {
+      id: 'vacuum-morph', name: 'VacuumMorph', global: 'VacuumMorph', varName: 'vm', pad: 4,
+      tagline: 'A swirl of wind sucks the content in and blows out the next.',
+      desc: 'A ring of wind streaks spirals in toward a point between the two elements. The source breaks into tiles that get sucked in, stretching toward the centre, then the wind reverses and blows the target back out into place.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'Wind vortex', 'Tile spiral'],
+      usageCall: "vm.scroll({ from: '#a h2', to: '#b h2' });   // sucks in as #b scrolls in",
+      controls: [
+        { key: 'color', label: 'Wind', type: 'select', options: [{ value: '#dff4ff', label: 'White' }, { value: '#00f0ff', label: 'Cyan' }, { value: '#ff2bd6', label: 'Magenta' }], def: '#dff4ff' },
+        { key: 'direction', type: 'select', options: ['cw', 'ccw'], def: 'cw' },
+        { key: 'wind', type: 'range', min: 0, max: 2, step: 0.1, def: 1 },
+        { key: 'streaks', type: 'range', min: 0, max: 300, step: 10, def: 110 },
+        { key: 'swirl', type: 'range', min: 0, max: 2.5, step: 0.1, def: 0.9 },
+        { key: 'spin', type: 'range', min: 0, max: 3, step: 0.1, def: 0.5 },
+        { key: 'stretch', type: 'range', min: 0, max: 5, step: 0.1, def: 2 },
+        { key: 'tile', label: 'Tile px', type: 'range', min: 4, max: 24, step: 1, def: 10 },
+        { key: 'stagger', type: 'range', min: 0, max: 0.9, step: 0.05, def: 0.5 }
+      ],
+      options: [
+        ['radius', "'auto'", 'Radius of the wind circle, px. auto = half the distance between the elements.'],
+        ['position', "'between'", "Where the vacuum sits: 'between' | 'viewport' | [fx, fy] viewport fractions."],
+        ['color', "'#dff4ff'", 'Wind colour.'],
+        ['wind', '1', 'Wind streak strength. 0 hides the wind.'],
+        ['streaks', '110', 'Wind streaks. About a third are dust specks.'],
+        ['swirl', '0.9', 'Turns a wind streak makes on its way in.'],
+        ['spin', '0.5', 'Turns a tile makes on its way in.'],
+        ['direction', "'cw'", "'cw' | 'ccw'."],
+        ['stretch', '2', 'How far tiles stretch toward the centre as they are pulled in.'],
+        ['tile', '10', 'Tile size, px.'],
+        ['stagger', '0.5', 'How spread out departures are, 0–0.9. Nearest tiles go first.'],
+        ['ease', "'in'", 'Pull ease. Blowing out plays it in reverse.']
+      ]
+    }, {
+      id: 'shatter-morph', name: 'ShatterMorph', global: 'ShatterMorph', varName: 'sm', pad: 2,
+      tagline: 'Content shatters like glass and the shards reassemble as the next.',
+      desc: 'Cracks spread from an impact point and the source breaks into glass shards. They blow outward, tumbling and catching the light, gather in a cloud between the elements, then fly in and lock together as the target.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'Glass shards', 'Sheen'],
+      usageCall: "sm.scroll({ from: '#a .card', to: '#b .card' });   // shatters as #b scrolls in",
+      controls: [
+        { key: 'shards', type: 'range', min: 10, max: 300, step: 10, def: 90 },
+        { key: 'force', type: 'range', min: 0, max: 3, step: 0.1, def: 1 },
+        { key: 'spread', label: 'Cloud size', type: 'range', min: 0.2, max: 2.5, step: 0.1, def: 1 },
+        { key: 'spin', type: 'range', min: 0, max: 3, step: 0.1, def: 1 },
+        { key: 'gravity', type: 'range', min: 0, max: 2, step: 0.1, def: 0.4 },
+        { key: 'sheen', type: 'range', min: 0, max: 1, step: 0.05, def: 0.6 },
+        { key: 'ease', type: 'select', options: ['inOut', 'out', 'sine', 'linear'], def: 'inOut' },
+        { key: 'cracks', type: 'switch', def: true }
+      ],
+      options: [
+        ['shards', '90', 'Roughly how many shards each element breaks into.'],
+        ['impact', "'center'", "Where the glass breaks from: 'center' | [fx, fy] element fractions."],
+        ['force', '1', 'How hard the shards blow outward.'],
+        ['spread', '1', 'Size of the shard cloud between the elements.'],
+        ['spin', '1', 'How much shards tumble.'],
+        ['gravity', '0.4', 'How much shards sag mid-flight.'],
+        ['sheen', '0.6', 'Light catching the shards as they turn.'],
+        ['cracks', 'true', 'Draw crack lines before the glass breaks.'],
+        ['edgeColor', "'rgba(255,255,255,.7)'", 'Shard edge highlight.'],
+        ['ease', "'inOut'", 'Flight ease.']
+      ]
+    }, {
+      id: 'glitch-morph', name: 'GlitchMorph', global: 'GlitchMorph', varName: 'gm', pad: 6,
+      tagline: 'RGB split, torn scanlines and a burst of digital noise.',
+      desc: 'The source corrupts: its RGB channels split, slices tear sideways and drop out, scanlines and noise blocks crawl over it. A burst of noise bridges the elements, then the target resolves out of the same corruption. Frames are seeded from progress, so scrubbing is repeatable.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'RGB split', 'Repeatable noise'],
+      usageCall: "gm.scroll({ from: '#a h2', to: '#b h2' });   // glitches as #b scrolls in",
+      controls: [
+        { key: 'intensity', type: 'range', min: 0, max: 2, step: 0.1, def: 1 },
+        { key: 'split', label: 'RGB split', type: 'range', min: 0, max: 30, step: 1, def: 8 },
+        { key: 'slices', type: 'range', min: 2, max: 60, step: 1, def: 16 },
+        { key: 'tear', type: 'range', min: 0, max: 200, step: 5, def: 60 },
+        { key: 'rate', label: 'Flicker', type: 'range', min: 10, max: 300, step: 10, def: 90 },
+        { key: 'noise', type: 'switch', def: true },
+        { key: 'scanlines', type: 'switch', def: true },
+        { key: 'burst', type: 'switch', def: true }
+      ],
+      options: [
+        ['intensity', '1', 'Overall glitch strength.'],
+        ['split', '8', 'Max RGB channel separation, px.'],
+        ['slices', '16', 'Horizontal slices per element.'],
+        ['tear', '60', 'Max sideways slice offset, px.'],
+        ['noise', 'true', 'Noise blocks over the content.'],
+        ['scanlines', 'true', 'Dark scanlines over the content.'],
+        ['burst', 'true', 'Burst of noise between the elements mid-morph.'],
+        ['colors', "['#00f0ff', '#ff2bd6', '#f5f7ff']", 'Noise block colours.'],
+        ['rate', '90', 'Glitch frames over the whole morph. Higher = more flicker while scrubbing.'],
+        ['ease', "'linear'", 'Glitch build-up ease.']
+      ]
+    }, {
+      id: 'ink-morph', name: 'InkMorph', global: 'InkMorph', varName: 'im', pad: 10,
+      tagline: 'Content dissolves like ink in water and condenses as the next.',
+      desc: 'The source bleeds and dissolves like ink dropped in water. Soft clouds in its colours bloom off it, curl and drift across, shifting toward the target’s colours, then gather as the target seeps back in.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'Soft dissolve', 'Ink clouds'],
+      usageCall: "im.scroll({ from: '#a h2', to: '#b h2' });   // dissolves as #b scrolls in",
+      controls: [
+        { key: 'origin', label: 'Dissolve from', type: 'select', options: ['edges', 'center', 'bottom', 'top', 'left', 'right'], def: 'edges' },
+        { key: 'puffs', label: 'Clouds', type: 'range', min: 0, max: 600, step: 20, def: 240 },
+        { key: 'size', type: 'range', min: 10, max: 120, step: 2, def: 46 },
+        { key: 'swirl', type: 'range', min: 0, max: 3, step: 0.1, def: 1 },
+        { key: 'drift', type: 'range', min: -150, max: 150, step: 5, def: 50 },
+        { key: 'density', type: 'range', min: 0.02, max: 0.5, step: 0.01, def: 0.16 },
+        { key: 'roughness', type: 'range', min: 0, max: 1, step: 0.05, def: 0.6 },
+        { key: 'soft', type: 'range', min: 0.01, max: 0.4, step: 0.01, def: 0.12 },
+        { key: 'bleed', type: 'range', min: 0, max: 1, step: 0.05, def: 0.8 }
+      ],
+      options: [
+        ['puffs', '240', 'Ink clouds in flight.'],
+        ['size', '46', 'Max cloud radius, px.'],
+        ['swirl', '1', 'How much the clouds curl and wander.'],
+        ['drift', '50', 'px the clouds rise as they travel.'],
+        ['origin', "'edges'", "Where the content dissolves first: edges | center | bottom | top | left | right."],
+        ['roughness', '0.6', 'How blotchy the dissolve is.'],
+        ['soft', '0.12', 'Softness of the dissolve edge.'],
+        ['bleed', '0.8', 'Blurred bleed around dissolving content.'],
+        ['density', '0.16', 'Opacity of each cloud.'],
+        ['brighten', '0.15', 'Lifts sampled colours toward white so the ink reads on dark grounds.'],
+        ['ease', "'sine'", 'Cloud flight ease.']
+      ]
+    }, {
+      id: 'sand-morph', name: 'SandMorph', global: 'SandMorph', varName: 'sd', pad: 2,
+      tagline: 'Content crumbles into sand that piles up into the next.',
+      desc: 'The source crumbles into grains of its own colours. They fall, stream across and pour onto the target, which builds up from the bottom like a pile of sand, each grain landing where its pixel belongs.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'Thousands of grains', 'Builds bottom-up'],
+      usageCall: "sd.scroll({ from: '#a h2', to: '#b h2' });   // crumbles as #b scrolls in",
+      controls: [
+        { key: 'crumble', label: 'Crumble from', type: 'select', options: ['bottom', 'top', 'left', 'right', 'random'], def: 'bottom' },
+        { key: 'grain', label: 'Grain px', type: 'range', min: 1, max: 5, step: 0.5, def: 2 },
+        { key: 'step', label: 'Grid px', type: 'range', min: 2, max: 8, step: 1, def: 3 },
+        { key: 'gravity', type: 'range', min: 0, max: 3, step: 0.1, def: 1 },
+        { key: 'drop', type: 'range', min: 0, max: 250, step: 10, def: 90 },
+        { key: 'spread', type: 'range', min: 0, max: 150, step: 5, def: 40 },
+        { key: 'roughness', type: 'range', min: 0, max: 1, step: 0.05, def: 0.3 }
+      ],
+      options: [
+        ['grain', '2', 'Grain size, px.'],
+        ['step', '3', 'Sampling grid, px. One grain per step × step pixels.'],
+        ['maxGrains', '6000', 'The grid is coarsened until each element has at most this many grains.'],
+        ['crumble', "'bottom'", "Where the source crumbles first: bottom | top | left | right | random."],
+        ['roughness', '0.3', 'How ragged the crumbling edge is.'],
+        ['gravity', '1', 'How far grains drop before they travel.'],
+        ['drop', '90', 'px grains fall onto the target from above.'],
+        ['spread', '40', 'Sideways scatter of the stream, px.'],
+        ['ease', "'inOut'", 'Grain flight ease.']
+      ]
+    }, {
+      id: 'pixelsort-morph', name: 'PixelSortMorph', global: 'PixelSortMorph', varName: 'ps', pad: 0,
+      tagline: 'Pixels sort into streaks, slide across and unsort as the next.',
+      desc: 'The source’s pixels are sorted by brightness along each column, starting with the brightest runs, until the content smears into streaks. The streaks slide across with after-images and the target unsorts back into place.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'Pixel sorting', 'Cached levels'],
+      usageCall: "ps.scroll({ from: '#a .card', to: '#b .card' });   // sorts as #b scrolls in",
+      controls: [
+        { key: 'direction', type: 'select', options: ['down', 'up', 'right', 'left'], def: 'down' },
+        { key: 'threshold', type: 'range', min: 0, max: 0.9, step: 0.05, def: 0.15 },
+        { key: 'stretch', type: 'range', min: 0, max: 2, step: 0.05, def: 0.6 },
+        { key: 'trails', type: 'range', min: 0, max: 8, step: 1, def: 3 },
+        { key: 'ease', type: 'select', options: ['inOut', 'sine', 'out', 'linear'], def: 'inOut' }
+      ],
+      options: [
+        ['direction', "'down'", "Sort direction: 'down' | 'up' | 'right' | 'left'."],
+        ['threshold', '0.15', 'Brightness floor at full sort. Darker pixels never sort.'],
+        ['stretch', '0.6', 'How far streaks run past the element, as a fraction of its size.'],
+        ['trails', '3', 'After-images while the streaks travel.'],
+        ['maxPixels', '120000', 'Per-element pixel budget for sorting.'],
+        ['ease', "'inOut'", 'Sort and travel ease.']
+      ]
+    }
+  ].map((fx, i) => {
+    // The newer effects share one API and adapter; only their controls and docs differ.
+    const v = fx.varName, file = fx.id + '.js';
+    return Object.assign({
+      num: String(7 + i).padStart(2, '0'), version: '1.0.0', hasIntro: false, file: 'effects/' + file, filename: file, demoStart: {},
+      api: [
+        { sig: fx.global + '.create(options)', desc: 'Creates an instance. Options become defaults for every morph it runs.' },
+        { sig: v + '.scroll({ from, to, trigger, edge, start, end })', desc: 'Scroll-scrubbed morph. start / end are viewport fractions for the trigger edge.' },
+        { sig: v + '.morph({ from, to }).progress(p)', desc: 'Manual control. Drive p from 0 to 1 yourself.' },
+        { sig: v + '.play({ from, to, duration, delay })', desc: 'Timed morph. Returns a Promise.' },
+        { sig: v + '.refresh() · ' + v + '.destroy()', desc: 'Re-snapshot after layout changes. Tear down layers and listeners.' }
+      ],
+      demo: {
+        create(FX, opts, els) {
+          const inst = FX.create(opts);
+          const m = inst.morph({ from: els.from, to: els.to });
+          return { progress: p => m.progress(p), invalidate: () => m.invalidate(), destroy: () => inst.destroy() };
+        }
+      }
+    }, fx, {
+      options: fx.options.concat([
+        ['pad', String(fx.pad), 'px of margin captured around each element.'],
+        ['maxDpr', '2', 'Caps canvas pixel ratio.'],
+        ['zIndex', '45', 'Stacking order of the effect layer.'],
+        ['hideContent', 'true', 'Hide real from / to content while the morph runs.'],
+        ['respectReducedMotion', 'true', 'Cross-fades instead when the OS asks for reduced motion.']
+      ]).map(([key, def, desc]) => ({ key, def, desc }))
+    });
+  })];
 
   state = { active: 'particle-morph', vals: null, p: 0.42, tab: 'usage', fromText: 'SIGNAL', toText: 'RECEIVED', source: '', copied: false, playing: false, scene: 'text', layout: 'h', image: (() => { try { return localStorage.getItem('motionlab.image') || ''; } catch (e) { return ''; } })() };
   fromRef = React.createRef();

@@ -10,6 +10,12 @@ Scroll-driven morph effects that move content from one DOM element to another. E
 | **BlackHoleMorph** | [effects/blackhole-morph.js](effects/blackhole-morph.js) | The source breaks into tiles that spiral into a black hole. It collapses in a flash, and a white hole throws the target back out. |
 | **PortalMorph** | [effects/portal-morph.js](effects/portal-morph.js) | The source sinks through a portal into the void, and the target steps out of a second portal. |
 | **WaterMorph** | [effects/water-morph.js](effects/water-morph.js) | The source melts into liquid drops that flow across and fill the target, which ripples as it settles. |
+| **VacuumMorph** | [effects/vacuum-morph.js](effects/vacuum-morph.js) | A swirl of wind streaks sucks the source in as tiles, then reverses and blows the target back out. |
+| **ShatterMorph** | [effects/shatter-morph.js](effects/shatter-morph.js) | The source cracks and breaks into glass shards that tumble into a cloud, then fly in and lock together as the target. |
+| **GlitchMorph** | [effects/glitch-morph.js](effects/glitch-morph.js) | The colour channels split apart, slices tear sideways, then a burst of digital noise reveals the target. |
+| **InkMorph** | [effects/ink-morph.js](effects/ink-morph.js) | The source dissolves like ink in water. Soft clouds drift across and condense as the target. |
+| **SandMorph** | [effects/sand-morph.js](effects/sand-morph.js) | The source crumbles into grains that pour across and pile up into the target from the bottom. |
+| **PixelSortMorph** | [effects/pixelsort-morph.js](effects/pixelsort-morph.js) | The pixels sort by brightness into streaks, which slide across and unsort as the target. |
 
 Every effect can be scrubbed by scroll, run on a timer, or driven by hand, and respects `prefers-reduced-motion` by default.
 
@@ -117,7 +123,7 @@ To write a custom `motion`, pass a function that changes `q.x` / `q.y`. It recei
 
 ### Options shared by the newer effects
 
-BurnMorph, BlackHoleMorph, PortalMorph and WaterMorph also take these options:
+Every effect except ParticleMorph and OrigamiMorph also takes these options:
 
 | Option | Default | Notes |
 | --- | --- | --- |
@@ -138,8 +144,6 @@ BurnMorph, BlackHoleMorph, PortalMorph and WaterMorph also take these options:
 | `embers` / `emberSize` / `rise` | `260` / `2.2` / `120` | Ember count, ember size in px, and how far embers float up before travelling. |
 | `reveal` | `'ignite'` | How the target appears: `'ignite'` (it burns in and cools) \| `'fade'` |
 | `ease` | `'inOut'` | Ember flight ease. |
-
-If the source or target contains a cross-origin image, the browser won't let BurnMorph read its pixels. In that case it falls back to a crossfade.
 
 ### BlackHoleMorph
 
@@ -179,9 +183,69 @@ If the source or target contains a cross-origin image, the browser won't let Bur
 | `resolution` | `0.5` | Render scale for the liquid. Lower is faster and softer. |
 | `ease` | `'sine'` | Drop flight ease. |
 
+### VacuumMorph
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `radius` / `position` | `'auto'` / `'between'` | Size of the wind circle in px (`'auto'` is half the distance between the elements), and where it sits. |
+| `color` / `wind` / `streaks` | `'#dff4ff'` / `1` / `110` | Wind colour, how strong the streaks look (0 hides them), and how many there are. About a third are dust specks. |
+| `swirl` / `spin` / `direction` | `0.9` / `0.5` / `'cw'` | Turns the wind makes on its way in, turns each tile makes, and which way they turn. |
+| `stretch` / `tile` / `stagger` | `2` / `10` / `0.5` | How far tiles stretch toward the centre, tile size in px, and how spread out the departures are. |
+| `ease` | `'in'` | Pull ease. Blowing out plays it in reverse. |
+
+### ShatterMorph
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `shards` / `impact` | `90` / `'center'` | Roughly how many shards each element breaks into, and where the break starts (`'center'` or `[fx, fy]`). |
+| `force` / `spread` | `1` / `1` | How hard the shards fly outward, and the size of the cloud between the elements. |
+| `spin` / `gravity` | `1` / `0.4` | How much the shards tumble, and how much they sag mid-flight. |
+| `sheen` / `cracks` / `edgeColor` | `0.6` / `true` / `'rgba(255,255,255,.7)'` | Light catching the shards, crack lines before the break, and the colour of the shard edges. |
+| `ease` | `'inOut'` | Flight ease. |
+
+### GlitchMorph
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `intensity` | `1` | Overall glitch strength. |
+| `split` / `slices` / `tear` | `8` / `16` / `60` | Max colour-channel separation in px, slices per element, and the max sideways tear in px. |
+| `noise` / `scanlines` / `burst` | `true` / `true` / `true` | Noise blocks, dark scanlines, and the noise burst between the elements. |
+| `colors` | `['#00f0ff', '#ff2bd6', '#f5f7ff']` | Noise block colours. |
+| `rate` | `90` | Glitch frames over the whole morph. The glitches are generated from the progress value, so scrubbing back and forth gives the same frames every time. |
+
+### InkMorph
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `puffs` / `size` / `density` | `240` / `46` / `0.16` | Number of ink clouds, their max radius in px, and how opaque each one is. |
+| `swirl` / `drift` | `1` / `50` | How much the clouds curl, and how many px they rise as they travel. |
+| `origin` / `roughness` / `soft` | `'edges'` / `0.6` / `0.12` | Where the content dissolves first, how blotchy the dissolve is, and how soft its edge is. |
+| `bleed` / `brighten` | `0.8` / `0.15` | Blurred bleed around the dissolving content, and how much the ink colours are lightened. |
+| `ease` | `'sine'` | Cloud flight ease. |
+
+### SandMorph
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `grain` / `step` / `maxGrains` | `2` / `3` / `6000` | Grain size in px, and the sampling grid in px (one grain per grid cell). The grid gets coarser until the grain count fits under `maxGrains`. |
+| `crumble` / `roughness` | `'bottom'` / `0.3` | Where the source crumbles first (`'bottom'` \| `'top'` \| `'left'` \| `'right'` \| `'random'`), and how ragged the edge is. |
+| `gravity` / `drop` / `spread` | `1` / `90` / `40` | How far grains fall first, how far in px they drop onto the target, and how far the stream scatters sideways in px. |
+| `ease` | `'inOut'` | Grain flight ease. |
+
+### PixelSortMorph
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `direction` | `'down'` | Sort direction: `'down'` \| `'up'` \| `'right'` \| `'left'` |
+| `threshold` | `0.15` | Pixels darker than this never sort, even at full sort (0–1). |
+| `stretch` / `trails` | `0.6` / `3` | How far the streaks run past the element (as a fraction of its size), and how many after-images trail behind as they travel. |
+| `ease` | `'inOut'` | Sort and travel ease. |
+
+BurnMorph, WaterMorph, InkMorph, SandMorph and PixelSortMorph read the content's pixels. If an element contains a cross-origin image, the browser blocks this, and those effects fall back to a crossfade.
+
 ## Demo pages
 
-- **index.html (Motion Lab)** is an effect explorer and the demo site's homepage. It includes all six effects. Pick an effect, tune its options with live controls, then copy the generated usage snippet, browse the options and source, or download the file.
+- **index.html (Motion Lab)** is an effect explorer and the demo site's homepage. It includes all twelve effects. Pick an effect, tune its options with live controls, then copy the generated usage snippet, browse the options and source, or download the file.
 - **[Paper Plane Page.dc.html](https://davidpetergosling.github.io/motion-morph-js/Paper%20Plane%20Page.dc.html)** is a sample landing page that uses OrigamiMorph between sections.
 
 You can try both pages on the [live demo site](https://davidpetergosling.github.io/motion-morph-js/). Both are built with the Neon Grid design system in `_ds/` and the `support.js` runtime. `image-slot.js` provides a drop-in `<image-slot>` image placeholder. To run them locally, serve the folder over HTTP rather than opening it from `file://`, because the pages fetch local files:
