@@ -1,15 +1,16 @@
 /*!
- * TeleporterMorph v1.0 — scroll-driven teleporter transitions between DOM content. Canvas 2D, no dependencies.
+ * ExitStageMorph v1.0 — scroll-driven "exit stage left, enter stage right" transitions. Canvas 2D, no dependencies.
  *
- *   const tp = TeleporterMorph.create({ color: '#9fd8ff' });
- *   tp.scroll({ from: '#a .card', to: '#b .card' });                  // scroll-scrubbed
- *   tp.scroll({ from: '#s1 h2', to: '#s2 h2', trigger: '#s1', edge: 'bottom', start: .667, end: .2 });
- *   const m = tp.morph({ from: x, to: y }); m.progress(0.5);           // manual control
- *   tp.play({ from: x, to: y, duration: 3000 });                       // timed, returns a Promise
+ *   const xs = ExitStageMorph.create({ exit: 'left', enter: 'right' });
+ *   xs.scroll({ from: '#a .card', to: '#b .card' });                  // scroll-scrubbed
+ *   xs.scroll({ from: '#s1 h2', to: '#s2 h2', trigger: '#s1', edge: 'bottom', start: .667, end: .2 });
+ *   const m = xs.morph({ from: x, to: y }); m.progress(0.5);           // manual control
+ *   xs.play({ from: x, to: y, duration: 2000 });                       // timed, returns a Promise
  *
- * A column of light switches on over the source. The content shimmers in flickering bands, washes into
- * the beam colour and dissolves into a cloud of twinkling sparkles, which fade as the beam powers down.
- * The same thing plays in reverse at the target, which materialises out of the sparkles.
+ * The source winds up, leans into the move and zips off the chosen edge of the screen, stretching with
+ * speed lines and after-images. The target zips in from its edge, overshoots, squashes on the stop and
+ * wobbles into place. Directions are screen directions: exit 'left' leaves off the left edge, enter 'right'
+ * comes in from the right edge. style: 'smooth' drops the cartoon touches for a plain slide.
  * Real content is hidden while the morph runs. Per-morph specs accept any option to override defaults.
  */
 (function (root) {
@@ -28,52 +29,26 @@
   var $ = function (x) { return typeof x === 'string' ? Array.prototype.slice.call(document.querySelectorAll(x)) : x == null ? [] : x.length != null && !x.nodeType ? Array.prototype.slice.call(x) : [x]; };
 
   var DEFAULTS = {
-    color: '#9fd8ff',         // beam and sparkle colour
-    sparkles: 420,            // sparkles per element
-    sparkleSize: 2.5,         // sparkle size, px
-    shimmer: 1,               // strength of the flickering bands (0–1.5)
-    band: 3,                  // shimmer band height, px
-    beam: true,               // column of light over the element
-    pads: true,               // bright emitter lines above and below the element
-    rise: 16,                 // px sparkles drift upward while they hang
-    rate: 60,                 // flicker frames over the whole morph
-    ease: 'inOut',            // content fade ease
-    pad: 6,                   // px of margin captured around each element
+    exit: 'left',             // edge the source leaves by: 'left' | 'right' | 'top' | 'bottom'
+    enter: 'right',           // edge the target comes in from: 'left' | 'right' | 'top' | 'bottom'
+    style: 'cartoon',         // 'cartoon' (wind-up, stretch, lean, wobble) | 'smooth' (plain slide)
+    anticipation: 1,          // size of the wind-up before leaving
+    stretch: 1,               // stretch along the move at speed, squash on the stop
+    lean: 1,                  // lean into the move
+    trails: 3,                // after-images at speed
+    speedLines: true,         // streaks behind the element at speed
+    lineColor: '#ffffff',     // speed line colour
+    overlap: 0.1,             // how much the exit and entrance overlap (0 = one after the other, 0.5 = together)
+    ease: 'in',               // exit ease
+    enterEase: 'back',        // entrance ease; 'back' overshoots
+    pad: 4,                   // px of margin captured around each element
     maxPixels: 600000,        // per-element snapshot pixel budget
     maxDpr: 2,
     zIndex: 45,
     hideContent: true,        // hide real from/to content while the morph runs
     respectReducedMotion: true
   };
-
-  // A four-point glint: soft glow plus a thin cross.
-  function glint(rgb) {
-    var R = 24, c = mkCanvas(R * 2, R * 2), g = c.getContext('2d'), gr = g.createRadialGradient(R, R, 0, R, R, R * 0.6);
-    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.3, rgba(rgb, 0.8)); gr.addColorStop(1, rgba(rgb, 0));
-    g.fillStyle = gr; g.fillRect(0, 0, R * 2, R * 2);
-    g.globalCompositeOperation = 'lighter'; g.strokeStyle = rgba(rgb, 0.9); g.lineWidth = 1.2;
-    g.beginPath(); g.moveTo(R, 2); g.lineTo(R, R * 2 - 2); g.moveTo(2, R); g.lineTo(R * 2 - 2, R); g.stroke();
-    return c;
-  }
-  // The light column: brightest down the middle, fading at the sides and toward the top and bottom.
-  function beamImage(rgb) {
-    var w = 64, h = 128, c = mkCanvas(w, h), g = c.getContext('2d'), id = g.createImageData(w, h);
-    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
-      var u = x / (w - 1), v = y / (h - 1), hx = Math.pow(Math.sin(PI * u), 1.5), vy = clamp(Math.min(v, 1 - v) / 0.25), i = (y * w + x) * 4;
-      id.data[i] = rgb[0]; id.data[i + 1] = rgb[1]; id.data[i + 2] = rgb[2]; id.data[i + 3] = 255 * 0.28 * hx * vy * vy * (3 - 2 * vy);
-    }
-    g.putImageData(id, 0, 0); return c;
-  }
-  // Points on the opaque parts of a snapshot (or anywhere in it when its pixels can't be read).
-  function points(sh, n, R) {
-    var d = sh.data && sh.data.data, out = [], tries = 0;
-    while (out.length < n && tries++ < n * 30) {
-      var x = R() * sh.W, y = R() * sh.H;
-      if (d) { var i = ((Math.floor(y * sh.h / sh.H) * sh.w) + Math.floor(x * sh.w / sh.W)) * 4; if (d[i + 3] < 40) continue; }
-      out.push([x, y, R(), R()]);
-    }
-    return out;
-  }
+  var DIRS = { left: [-1, 0], right: [1, 0], top: [0, -1], bottom: [0, 1] };
 
   function mkCanvas(w, h) { var c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
   function isClear(c) {
@@ -172,62 +147,86 @@
       ctx.globalAlpha = clamp(1 - p * 2); ctx.drawImage(S.tex, S.ox, S.oy, S.W, S.H);
       ctx.globalAlpha = clamp(p * 2 - 1); ctx.drawImage(T.tex, T.ox, T.oy, T.W, T.H); ctx.globalAlpha = 1;
     }
-    // One element (de)materialising. u: 0 = solid, 1 = gone. f: flicker frame.
-    function beamIn(m, sh, u, f) {
-      var mo = m.o, c = m.rgb, hot = m.hot, x = sh.ox, y = sh.oy, W = sh.W, H = sh.H;
-      var beamA = mo.beam ? EASE.out(win(u, 0, 0.18)) * (1 - EASE.in(win(u, 0.8, 1))) : 0, tk = win(u, 0.08, 0.42);
-      var cA = 1 - m.ease(win(u, 0.25, 0.7)), sA = EASE.out(win(u, 0.1, 0.35)) * (1 - EASE.in(win(u, 0.7, 0.98))), sh2 = clamp(mo.shimmer / 1.5) * Math.sin(PI * win(u, 0.02, 0.75));
-      var bx = x - W * 0.12, bw = W * 1.24, by = y - H * 0.5, bh = H * 2;
-      if (beamA > 0.01) {
-        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = beamA; ctx.drawImage(m.beamImg, bx, by, bw, bh); ctx.restore();
+    // Distance to move sheet sh in direction d until it is fully off screen.
+    function offDist(sh, d) {
+      var m = 24;
+      return d[0] < 0 ? sh.ox + sh.W + m : d[0] > 0 ? VW - sh.ox + m : d[1] < 0 ? sh.oy + sh.H + m : VH - sh.oy + m;
+    }
+    // Draw a sheet displaced by (dx, dy), stretched along d (sA) and across it (sP), leaning by `lean`.
+    function place(sh, d, dx, dy, sA, sP, lean, alpha) {
+      if (alpha <= 0.01) return;
+      var cx = sh.ox + sh.W / 2 + dx, cy = sh.oy + sh.H / 2 + dy, sx = d[0] ? sA : sP, sy = d[0] ? sP : sA;
+      ctx.save(); ctx.translate(cx, cy);
+      // Lean: the leading top edge pushes ahead for horizontal moves, the leading side for vertical ones.
+      if (d[0]) ctx.transform(1, 0, -lean * d[0], 1, 0, 0); else ctx.transform(1, -lean * d[1] * 0.5, 0, 1, 0, 0);
+      ctx.scale(sx, sy); ctx.globalAlpha = alpha;
+      ctx.drawImage(sh.tex, -sh.W / 2, -sh.H / 2, sh.W, sh.H);
+      ctx.restore();
+    }
+    function lines(m, sh, d, dx, dy, speed) {
+      if (!m.o.speedLines || speed < 0.05) return;
+      var R = rng(m.seed), n = 7, L = 40 + 220 * speed;
+      ctx.save(); ctx.strokeStyle = rgba(m.lineRgb, 0.85 * Math.min(1, speed * 1.5)); ctx.lineCap = 'round';
+      for (var i = 0; i < n; i++) {
+        var f = 0.1 + 0.8 * R(), len = L * (0.5 + R() * 0.5), w = 1 + R() * 2, x, y;
+        ctx.lineWidth = w;
+        if (d[0]) { y = sh.oy + dy + sh.H * f; x = d[0] < 0 ? sh.ox + dx + sh.W + 10 : sh.ox + dx - 10; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - d[0] * len, y); ctx.stroke(); }
+        else { x = sh.ox + dx + sh.W * f; y = d[1] < 0 ? sh.oy + dy + sh.H + 10 : sh.oy + dy - 10; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - d[1] * len); ctx.stroke(); }
       }
-      // Emitter lines grow out from their centre (and fade in) as the transport starts, and shrink back to it as it ends.
-      var grow = mo.pads ? EASE.inOut(win(u, 0, 0.2)) * (1 - EASE.inOut(win(u, 0.8, 1))) : 0;
-      if (grow > 0.005) {
-        var half = bw * 0.35 * grow, mid = bx + bw / 2, la = Math.sqrt(grow);
-        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
-        [y - 6, y + H + 6].forEach(function (yy) {
-          [[8, 0.12], [3, 0.4], [1.2, 0.95]].forEach(function (L) { ctx.strokeStyle = rgba(L[1] > 0.5 ? hot : c, L[1] * la); ctx.lineWidth = L[0]; ctx.beginPath(); ctx.moveTo(mid - half, yy); ctx.lineTo(mid + half, yy); ctx.stroke(); });
-        });
-        ctx.restore();
-      }
-      if (cA > 0.01) {
-        var band = Math.max(1, +mo.band || 3), ky = sh.h / sh.H;
-        for (var yy = 0; yy < H; yy += band) {
-          var hh = Math.min(band, H - yy), row = yy / band | 0, a = cA * (1 - sh2 * 0.8 * hash(row, f, 3)), dx = (hash(row, f, 9) - 0.5) * 6 * sh2;
-          ctx.globalAlpha = a * (1 - tk); ctx.drawImage(sh.tex, 0, yy * ky, sh.w, hh * ky, x + dx, y + yy, W, hh);
-          if (tk > 0.01) { ctx.globalAlpha = a * tk; ctx.drawImage(sh.lit, 0, yy * ky, sh.w, hh * ky, x + dx, y + yy, W, hh); }
+      ctx.restore();
+    }
+    // Source leaving. u: 0 → 1 over the exit window.
+    function exitAt(m, u) {
+      var mo = m.o, S = m.S, d = DIRS[mo.exit] || DIRS.left, D = offDist(S, d), toon = mo.style !== 'smooth', a = toon ? 0.3 : 0;
+      var pos = function (t) {
+        var back = toon ? Math.sin(PI * clamp(t / a)) * 18 * mo.anticipation * (t < a ? 1 : 0) : 0;
+        return t < a ? -back : D * m.ease(clamp((t - a) / (1 - a)));
+      };
+      var s = pos(u), speed = clamp((pos(Math.min(1, u + 0.02)) - s) / D * 6);
+      var wind = toon && u < a ? Math.sin(PI * u / a) : 0, st = toon ? mo.stretch : 0;
+      var sA = 1 + st * (0.6 * speed - 0.12 * wind), sP = 1 - st * (0.25 * speed - 0.1 * wind), lean = toon ? mo.lean * (0.28 * speed - 0.12 * wind) : 0;
+      if (toon) {
+        for (var k = Math.round(mo.trails); k >= 1; k--) {
+          var sk = pos(Math.max(0, u - k * 0.035)); if (s - sk < 4) continue;
+          place(S, d, d[0] * sk, d[1] * sk, sA, sP, lean, 0.22 / k * Math.min(1, speed * 2));
         }
-        ctx.globalAlpha = 1;
+        lines(m, S, d, d[0] * s, d[1] * s, speed);
       }
-      if (sA > 0.01) {
-        ctx.save(); ctx.globalCompositeOperation = 'lighter';
-        var s = mo.sparkleSize, rise = mo.rise;
-        sh.pts.forEach(function (q, i) {
-          var tw = hash(i, f, 5), a = sA * (0.25 + 0.75 * tw * tw); if (a < 0.03) return;
-          var r = s * (0.6 + 1.4 * hash(i, f, 7)) * 2;
-          ctx.globalAlpha = a; ctx.drawImage(m.glint, x + q[0] - r, y + q[1] - rise * u * q[2] - r, r * 2, r * 2);
-        });
-        ctx.restore();
+      place(S, d, d[0] * s, d[1] * s, sA, sP, lean, 1);
+    }
+    // Target arriving. v: 0 → 1 over the entrance window.
+    function enterAt(m, v) {
+      var mo = m.o, T = m.T, from = DIRS[mo.enter] || DIRS.right, d = [-from[0], -from[1]], D = offDist(T, from), toon = mo.style !== 'smooth';
+      var ee = EASE[mo.enterEase] || (typeof mo.enterEase === 'function' ? mo.enterEase : EASE.back), tv = toon ? 0.7 : 1;
+      var pos = function (t) { return -D * (1 - ee(clamp(t / tv))); };   // along d; 0 = home
+      var s = pos(v), speed = clamp(Math.abs(pos(Math.min(1, v + 0.02)) - s) / D * 6), st = toon ? mo.stretch : 0;
+      var sA = 1 + st * 0.6 * speed, sP = 1 - st * 0.25 * speed, lean = toon ? -mo.lean * 0.2 * speed : 0;
+      if (toon && v > tv * 0.85) {
+        // Squash on the stop, then a damped wobble.
+        var t = (v - tv * 0.85) / (1 - tv * 0.85), w = Math.exp(-5 * t) * Math.cos(t * 14) * (1 - t);
+        sA *= 1 - 0.14 * st * w; sP *= 1 + 0.1 * st * w; lean += mo.lean * 0.08 * w;
       }
+      if (toon) {
+        for (var k = Math.round(mo.trails); k >= 1; k--) {
+          var sk = pos(Math.max(0, v - k * 0.035)); if (Math.abs(s - sk) < 4) continue;
+          place(T, d, d[0] * sk, d[1] * sk, sA, sP, lean, 0.22 / k * Math.min(1, speed * 2));
+        }
+        lines(m, T, d, d[0] * s, d[1] * s, speed);
+      }
+      place(T, d, d[0] * s, d[1] * s, sA, sP, lean, 1);
     }
-    function setup(m) {
-      var mo = m.o, R = rng(17), n = Math.max(0, Math.round(mo.sparkles));
-      m.rgb = rgbOf(mo.color); m.hot = m.rgb.map(function (v) { return Math.round(lerp(v, 255, 0.7)); }); m.glint = glint(m.rgb); m.beamImg = beamImage(m.rgb);
-      [m.S, m.T].forEach(function (sh) { sh.lit = tinted(sh.tex, mo.color, 0.5); sh.pts = points(sh, n, R); });
-      return true;
-    }
+    function setup(m) { m.lineRgb = rgbOf(m.o.lineColor); m.seed = 11; return true; }
     function draw(m, p) {
-      var f = Math.floor(p * (+m.o.rate || 60));
-      if (p < 0.5) beamIn(m, m.S, p / 0.5, f);
-      else beamIn(m, m.T, 1 - (p - 0.5) / 0.5, f);
+      var ov = Math.max(0, Math.min(0.5, +m.o.overlap || 0)), e1 = 0.5 + ov / 2, e0 = 0.5 - ov / 2;
+      if (p < e1) exitAt(m, win(p, 0, e1));
+      if (p > e0) enterAt(m, win(p, e0, 1));
     }
 
     function Morph(spec) {
       this.spec = spec; this.p = 0;
       this.o = {}; for (var k in o) this.o[k] = spec[k] !== undefined ? spec[k] : o[k];
       this.fromEls = $(spec.from); this.toEls = $(spec.to);
-      this.ease = typeof this.o.ease === 'function' ? this.o.ease : EASE[this.o.ease] || EASE.inOut;
+      this.ease = typeof this.o.ease === 'function' ? this.o.ease : EASE[this.o.ease] || EASE.in;
     }
     Morph.prototype.build = function () {
       ensureLayer();
@@ -279,7 +278,7 @@
       },
       play: function (spec) {
         ensureLayer(); var m = new Morph(spec); m.manual = true; morphs.push(m); listen(); m.fades(0);
-        var dur = spec.duration || 3000, delay = spec.delay || 0;
+        var dur = spec.duration || 2000, delay = spec.delay || 0;
         return new Promise(function (res) {
           if (reduced) { m.p = 1; m.fades(1); return res(m); }
           var t0 = null;
@@ -301,5 +300,5 @@
   }
 
   var api = { create: create, version: '1.0.0' };
-  if (typeof module === 'object' && module.exports) module.exports = api; else root.TeleporterMorph = api;
+  if (typeof module === 'object' && module.exports) module.exports = api; else root.ExitStageMorph = api;
 })(typeof window !== 'undefined' ? window : this);

@@ -19,6 +19,7 @@ Scroll-driven morph effects that move content from one DOM element to another. E
 | **BubbleMorph** | [effects/bubble-morph.js](effects/bubble-morph.js) | The source floats off in soap bubbles, each carrying a magnified piece of the content. They pop into place as the target. |
 | **ElectricityMorph** | [effects/electricity-morph.js](effects/electricity-morph.js) | Arcs crackle over the source, then a branching lightning bolt zaps it across and the target flickers on. |
 | **SmokeBombMorph** | [effects/smokebomb-morph.js](effects/smokebomb-morph.js) | A smoke bomb hides the source. A trail of puffs dashes across, and the target appears as a second bomb clears. |
+| **ExitStageMorph** | [effects/exitstage-morph.js](effects/exitstage-morph.js) | The source zips off any edge of the screen with cartoon wind-up, stretch and speed lines, and the target zips in from another edge and wobbles into place. |
 
 Every effect can be scrubbed by scroll, run on a timer, or driven by hand, and respects `prefers-reduced-motion` by default.
 
@@ -276,11 +277,28 @@ Every effect except ParticleMorph and OrigamiMorph also takes these options:
 | `trail` | `true` | A trail of puffs dashing from the source to the target. |
 | `ease` | `'out'` | Smoke expansion ease. |
 
+### ExitStageMorph
+
+The directions are screen directions: `exit: 'left'` leaves off the left edge of the screen, and `enter: 'right'` comes in from the right edge. In a theatre, "stage left" is the performer's left, which is the audience's right.
+
+```js
+ExitStageMorph.create({ exit: 'left', enter: 'right' }).scroll({ from: '#a .card', to: '#b .card' });
+```
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `exit` / `enter` | `'left'` / `'right'` | Edge the source leaves by, and edge the target comes in from: `'left'` \| `'right'` \| `'top'` \| `'bottom'` |
+| `style` | `'cartoon'` | `'cartoon'` (wind-up, stretch, lean and wobble) \| `'smooth'` (a plain slide) |
+| `anticipation` / `stretch` / `lean` | `1` / `1` / `1` | How big the wind-up before leaving is, how much the element stretches at speed and squashes when it stops, and how far it leans into the move. |
+| `trails` / `speedLines` / `lineColor` | `3` / `true` / `'#ffffff'` | After-images at speed, streaks behind the element, and the streak colour. |
+| `overlap` | `0.1` | How much the exit and entrance overlap. 0 is one after the other; 0.5 is both at once. |
+| `ease` / `enterEase` | `'in'` / `'back'` | Exit and entrance eases. `'back'` overshoots. |
+
 BurnMorph, WaterMorph, InkMorph and SandMorph read the content's pixels. If an element contains a cross-origin image, the browser blocks this, and those effects fall back to a crossfade.
 
 ## Demo pages
 
-- **index.html (Motion Lab)** is an effect explorer and the demo site's homepage. It includes all fifteen effects. Pick an effect, tune its options with live controls, then copy the generated usage snippet, browse the options and source, or download the file.
+- **index.html (Motion Lab)** is an effect explorer and the demo site's homepage. It includes all sixteen effects. Pick an effect, tune its options with live controls, then copy the generated usage snippet, browse the options and source, or download the file.
 - **[Paper Plane Page.dc.html](https://davidpetergosling.github.io/motion-morph-js/Paper%20Plane%20Page.dc.html)** is a sample landing page that uses OrigamiMorph between sections.
 
 You can try both pages on the [live demo site](https://davidpetergosling.github.io/motion-morph-js/). Both are built with the Neon Grid design system in `_ds/` and the `support.js` runtime. `image-slot.js` provides a drop-in `<image-slot>` image placeholder. To run them locally, serve the folder over HTTP rather than opening it from `file://`, because the pages fetch local files:

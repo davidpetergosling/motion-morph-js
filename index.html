@@ -825,6 +825,38 @@ class Component extends DCLogic {
         ['trail', 'true', 'Trail of puffs dashing from source to target.'],
         ['ease', "'out'", 'Smoke expansion ease.']
       ]
+    }, {
+      id: 'exitstage-morph', name: 'ExitStageMorph', global: 'ExitStageMorph', varName: 'xs', pad: 4,
+      tagline: 'Exit stage left, enter stage right — cartoon zip-offs and zip-ins.',
+      desc: 'The source winds up, leans into the move and zips off the chosen edge of the screen with speed lines and after-images. The target zips in from its edge, overshoots, squashes on the stop and wobbles into place. Directions are screen directions.',
+      tags: ['Canvas 2D', 'Scroll-driven', 'Any edge', 'Squash + stretch'],
+      usageCall: "xs.scroll({ from: '#a .card', to: '#b .card', exit: 'left', enter: 'right' });",
+      controls: [
+        { key: 'exit', label: 'Exit to', type: 'select', options: ['left', 'right', 'top', 'bottom'], def: 'left' },
+        { key: 'enter', label: 'Enter from', type: 'select', options: ['left', 'right', 'top', 'bottom'], def: 'right' },
+        { key: 'style', type: 'select', options: ['cartoon', 'smooth'], def: 'cartoon' },
+        { key: 'enterEase', label: 'Enter ease', type: 'select', options: ['back', 'out', 'inOut', 'sine'], def: 'back' },
+        { key: 'anticipation', label: 'Wind-up', type: 'range', min: 0, max: 3, step: 0.1, def: 1 },
+        { key: 'stretch', type: 'range', min: 0, max: 2.5, step: 0.1, def: 1 },
+        { key: 'lean', type: 'range', min: 0, max: 3, step: 0.1, def: 1 },
+        { key: 'trails', type: 'range', min: 0, max: 8, step: 1, def: 3 },
+        { key: 'overlap', type: 'range', min: 0, max: 0.5, step: 0.05, def: 0.1 },
+        { key: 'speedLines', label: 'Speed lines', type: 'switch', def: true }
+      ],
+      options: [
+        ['exit', "'left'", "Edge the source leaves by: 'left' | 'right' | 'top' | 'bottom'."],
+        ['enter', "'right'", "Edge the target comes in from: 'left' | 'right' | 'top' | 'bottom'."],
+        ['style', "'cartoon'", "'cartoon' (wind-up, stretch, lean, wobble) | 'smooth' (plain slide)."],
+        ['anticipation', '1', 'Size of the wind-up before leaving.'],
+        ['stretch', '1', 'Stretch along the move at speed, squash on the stop.'],
+        ['lean', '1', 'Lean into the move.'],
+        ['trails', '3', 'After-images at speed.'],
+        ['speedLines', 'true', 'Streaks behind the element at speed.'],
+        ['lineColor', "'#ffffff'", 'Speed line colour.'],
+        ['overlap', '0.1', 'How much the exit and entrance overlap. 0 = one after the other, 0.5 = together.'],
+        ['ease', "'in'", 'Exit ease.'],
+        ['enterEase', "'back'", 'Entrance ease. back overshoots.']
+      ]
     }
   ].map((fx, i) => {
     // The newer effects share one API and adapter; only their controls and docs differ.
