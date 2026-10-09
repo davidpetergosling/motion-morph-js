@@ -104,8 +104,8 @@ To write a custom `motion`, pass a function that changes `q.x` / `q.y`. It recei
 
 ## Demo pages
 
-- **Motion Lab.dc.html** is an effect explorer. Pick an effect, tune its options with live controls, then copy the generated usage snippet, browse the options and source, or download the file.
-- **Paper Plane Page.dc.html** is a sample landing page that uses OrigamiMorph between sections.
+- **index.html (Motion Lab)** is an effect explorer and the demo site's homepage. Pick an effect, tune its options with live controls, then copy the generated usage snippet, browse the options and source, or download the file.
+- **[Paper Plane Page.dc.html](https://davidpetergosling.github.io/motion-morph-js/Paper%20Plane%20Page.dc.html)** is a sample landing page that uses OrigamiMorph between sections.
 
 You can try both pages on the [live demo site](https://davidpetergosling.github.io/motion-morph-js/). Both are built with the Neon Grid design system in `_ds/` and the `support.js` runtime. `image-slot.js` provides a drop-in `<image-slot>` image placeholder. To run them locally, serve the folder over HTTP rather than opening it from `file://`, because the pages fetch local files:
 
@@ -122,6 +122,6 @@ effects/            the morph libraries (standalone, no dependencies)
 _ds/                Neon Grid design system tokens and bundle
 support.js          runtime for the .dc.html pages (generated, do not edit)
 image-slot.js       <image-slot> web component
-index.html          demos landing page (GitHub Pages)
-*.dc.html           demo pages
+index.html          Motion Lab effect explorer (demo site homepage)
+*.dc.html           other demo pages
 ```
