@@ -62,8 +62,9 @@ All the effects share the same API:
 | --- | --- |
 | `X.create(options)` | Creates an instance. Its options become the defaults for every morph it runs. |
 | `inst.scroll({ from, to, trigger, edge, start, end })` | A morph scrubbed by scroll. `trigger` defaults to `to`, and `edge` is `'top'` (default) or `'bottom'`. `start` and `end` are viewport fractions for where that edge sits (defaults `0.95` → `0.35`). |
-| `inst.morph({ from, to })` | A morph you control by hand. Call `.progress(p)` on the returned morph with `p` from 0 to 1. |
+| `inst.morph({ from, to })` | A morph you control by hand. Call `.progress(p)` on the returned morph with `p` from 0 to 1. Calling `.progress()` with no argument returns the current progress. |
 | `inst.play({ from, to, duration, delay })` | A timed morph that returns a Promise. With ParticleMorph you can leave out `from` and the dots gather from `scatter`, which suits a page-load intro. |
+| `inst.scrollTrigger({ from, to }, stOptions)` | A morph driven by GSAP ScrollTrigger. See [Using with GSAP](#using-with-gsap). |
 | `inst.refresh()` | Re-measures and re-samples after layout changes. |
 | `inst.destroy()` | Removes the canvas layers and listeners and restores the content. |
 
@@ -75,6 +76,37 @@ pm.scroll({ from: '#s1', to: '#s2 h2', trigger: '#s1', edge: 'bottom', start: .6
 
 // Page-load intro
 await pm.play({ to: '#hero', duration: 3000, scatter: 'viewport' });
+```
+
+## Using with GSAP
+
+If your site already uses [GSAP ScrollTrigger](https://gsap.com/docs/v3/Plugins/ScrollTrigger/), you can let it drive any of the effects. GSAP is optional. The effects don't need it, and they only use it if you call `scrollTrigger()`.
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="effects/burn-morph.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+  const bm = BurnMorph.create();
+
+  // Same defaults as bm.scroll(): triggers on `to`, from 'top 95%' to 'top 35%', scrubbed.
+  bm.scrollTrigger({ from: '#a h2', to: '#b h2' });
+
+  // Or pass any ScrollTrigger options. A number for `scrub` smooths the morph's progress.
+  bm.scrollTrigger({ from: '#c', to: '#d' }, { trigger: '#d', start: 'top bottom', end: 'center center', scrub: 0.6, markers: true });
+</script>
+```
+
+`scrollTrigger()` returns the morph, and the trigger it created is available as `m.st`. Calling `m.destroy()` or `bm.destroy()` also removes the trigger. Your own `onUpdate` callback still runs. If ScrollTrigger isn't a global, for example when you import it as a module, pass it in: `bm.scrollTrigger(spec, { ScrollTrigger })`.
+
+GSAP can also animate a morph's progress like any other value. This lets you put a morph on a timeline alongside your other animations:
+
+```js
+const m = bm.morph({ from: '#a h2', to: '#b h2' });
+gsap.timeline({ scrollTrigger: { trigger: '#b', start: 'top bottom', end: 'bottom top', scrub: true } })
+  .to('#b .subtitle', { opacity: 1 })
+  .to(m, { progress: 1, ease: 'none', duration: 2 }, '<');
 ```
 
 ## Options

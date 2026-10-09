@@ -243,8 +243,8 @@
       this.toEls.forEach(function (e) { e.style.opacity = b; });
       if (this.spec.onProgress) this.spec.onProgress(p);
     };
-    Morph.prototype.progress = function (p) { this.p = clamp(p); this.fades(this.p); this.manual = true; schedule(); return this; };
-    Morph.prototype.destroy = function () { this.o.hideContent = false; this.fades(0); morphs.splice(morphs.indexOf(this), 1); var i = scrolled.indexOf(this); if (i > -1) scrolled.splice(i, 1); schedule(); };
+    Morph.prototype.progress = function (p) { if (p === undefined) return this.p; this.p = clamp(p); this.fades(this.p); this.manual = true; schedule(); return this; };
+    Morph.prototype.destroy = function () { if (this.st) { this.st.kill(); this.st = null; } this.o.hideContent = false; this.fades(0); morphs.splice(morphs.indexOf(this), 1); var i = scrolled.indexOf(this); if (i > -1) scrolled.splice(i, 1); schedule(); };
 
     function frame() {
       ticking = false;
@@ -292,8 +292,25 @@
         });
       },
       refresh: onResize,
+      // GSAP: let ScrollTrigger drive the morph. stOptions takes any ScrollTrigger option (scrub defaults to true);
+      // start / end / trigger / edge default to the same values as scroll(). Returns the morph.
+      scrollTrigger: function (spec, stOptions) {
+        var st = stOptions || {}, ST = st.ScrollTrigger || root.ScrollTrigger;
+        if (!ST) throw new Error('scrollTrigger() needs GSAP ScrollTrigger: load it and call gsap.registerPlugin(ScrollTrigger), or pass { ScrollTrigger: ScrollTrigger }');
+        var m = this.morph(spec), cfg = {}, k, edge = spec.edge === 'bottom' ? 'bottom ' : 'top ';
+        var pct = function (v, d) { return edge + +((v != null ? v : d) * 100).toFixed(2) + '%'; };
+        for (k in st) if (k !== 'ScrollTrigger') cfg[k] = st[k];
+        if (cfg.trigger == null) cfg.trigger = $(spec.trigger || spec.to)[0];
+        if (cfg.start == null) cfg.start = pct(spec.start, 0.95);
+        if (cfg.end == null) cfg.end = pct(spec.end, 0.35);
+        if (cfg.scrub == null) cfg.scrub = true;
+        var user = cfg.onUpdate;
+        cfg.onUpdate = function (self) { m.progress(self.progress); if (user) user.call(this, self); };
+        m.st = ST.create(cfg); m.progress(m.st.progress);
+        return m;
+      },
       destroy: function () {
-        morphs.slice().forEach(function (m) { m.o.hideContent = false; m.fades(0); }); morphs = []; scrolled = [];
+        morphs.slice().forEach(function (m) { if (m.st) { m.st.kill(); m.st = null; } m.o.hideContent = false; m.fades(0); }); morphs = []; scrolled = [];
         removeEventListener('scroll', schedule); removeEventListener('resize', onResize); listening = false;
         if (cv) cv.remove(); cv = null;
       }

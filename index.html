@@ -888,6 +888,12 @@ class Component extends DCLogic {
     });
   })];
 
+  // Every effect also has the GSAP ScrollTrigger hook; list it just above refresh / destroy.
+  _gsapApi = this.EFFECTS.forEach(fx => fx.api.splice(fx.api.length - 1, 0, {
+    sig: fx.varName + '.scrollTrigger({ from, to }, { start, end, scrub })',
+    desc: 'GSAP: let ScrollTrigger drive the morph. Takes any ScrollTrigger option; scrub defaults to true. Morphs also tween with gsap.to(m, { progress: 1 }).'
+  }));
+
   state = { active: 'particle-morph', vals: null, p: 0.42, tab: 'usage', fromText: 'SIGNAL', toText: 'RECEIVED', source: '', copied: false, playing: false, scene: 'text', layout: 'h', image: (() => { try { return localStorage.getItem('motionlab.image') || ''; } catch (e) { return ''; } })() };
   fromRef = React.createRef();
   toRef = React.createRef();
