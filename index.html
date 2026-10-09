@@ -355,6 +355,221 @@ class Component extends DCLogic {
         return { progress: p => m.progress(p), invalidate: () => m.invalidate(), phases: () => m.phases(), destroy: () => om.destroy() };
       }
     }
+  }, {
+    id: 'burn-morph', num: '03', name: 'BurnMorph', version: '1.0.0', global: 'BurnMorph', varName: 'bm', hasIntro: false,
+    file: 'effects/burn-morph.js', filename: 'burn-morph.js',
+    tagline: 'Content burns away and the embers ignite the next element.',
+    desc: 'A ragged, glowing front eats through the source, charring the content ahead of it and throwing off embers and smoke. The embers drift across and ignite the target, which burns in and cools to its real colours.',
+    tags: ['Canvas 2D', 'Scroll-driven', 'Per-pixel burn', 'Embers + smoke'],
+    demoStart: {},
+    controls: [
+      { key: 'origin', label: 'Burn from', type: 'select', options: ['bottom', 'top', 'left', 'right', 'edges', 'center'], def: 'bottom' },
+      { key: 'reveal', type: 'select', options: ['ignite', 'fade'], def: 'ignite' },
+      { key: 'roughness', type: 'range', min: 0, max: 1, step: 0.05, def: 0.45 },
+      { key: 'noiseScale', label: 'Blotch size', type: 'range', min: 0.3, max: 3, step: 0.1, def: 1 },
+      { key: 'edge', label: 'Front width', type: 'range', min: 0.02, max: 0.2, step: 0.01, def: 0.06 },
+      { key: 'char', type: 'range', min: 0, max: 0.3, step: 0.01, def: 0.08 },
+      { key: 'embers', type: 'range', min: 0, max: 800, step: 20, def: 260 },
+      { key: 'emberSize', label: 'Ember size', type: 'range', min: 0.5, max: 5, step: 0.1, def: 2.2 },
+      { key: 'rise', type: 'range', min: 0, max: 300, step: 10, def: 120 },
+      { key: 'glow', type: 'switch', def: true },
+      { key: 'smoke', type: 'switch', def: true }
+    ],
+    usageCall: "bm.scroll({ from: '#a h2', to: '#b h2' });   // burns as #b scrolls in",
+    api: [
+      { sig: 'BurnMorph.create(options)', desc: 'Creates an instance. Options become defaults for every morph it runs.' },
+      { sig: 'bm.scroll({ from, to, trigger, edge, start, end })', desc: 'Scroll-scrubbed burn. start / end are viewport fractions for the trigger edge.' },
+      { sig: 'bm.morph({ from, to }).progress(p)', desc: 'Manual control. Drive p from 0 to 1 yourself.' },
+      { sig: 'bm.play({ from, to, duration, delay })', desc: 'Timed burn. Returns a Promise.' },
+      { sig: 'bm.refresh() · bm.destroy()', desc: 'Re-snapshot after layout changes. Tear down layers and listeners.' }
+    ],
+    options: [
+      ['origin', "'bottom'", "Where the burn starts: bottom | top | left | right | edges | center | [fx, fy] element fractions."],
+      ['roughness', '0.45', 'How ragged the burn front is. 0 = a straight line, 1 = pure noise.'],
+      ['noiseScale', '1', 'Size of the ragged blotches.'],
+      ['edge', '0.06', 'Width of the glowing front, as a fraction of the burn.'],
+      ['char', '0.08', 'Width of the charred band ahead of the front.'],
+      ['colors', "['#fff6c2', …]", 'Ember colour ramp, hottest → coolest.'],
+      ['glow', 'true', 'Soft additive halo around the front.'],
+      ['embers', '260', 'Ember count. About 60% fly to the target; the rest rise and die.'],
+      ['emberSize', '2.2', 'Ember size, px.'],
+      ['rise', '120', 'px embers float up before they travel.'],
+      ['smoke', 'true', 'Faint smoke puffs off the front.'],
+      ['reveal', "'ignite'", "Target entrance: 'ignite' (burns in, cooling) | 'fade'."],
+      ['ease', "'inOut'", 'Ember flight ease: inOut | out | in | linear | sine | function(t).'],
+      ['pad', '8', 'px of margin captured around each element so glow and char are not cropped.'],
+      ['maxPixels', '160000', 'Per-element pixel budget for the burn simulation.'],
+      ['maxDpr', '2', 'Caps canvas pixel ratio.'],
+      ['zIndex', '45', 'Stacking order of the effect layer.'],
+      ['hideContent', 'true', 'Hide real from / to content while the morph runs.'],
+      ['respectReducedMotion', 'true', 'Cross-fades instead when the OS asks for reduced motion.']
+    ].map(([key, def, desc]) => ({ key, def, desc })),
+    demo: {
+      create(BM, opts, els) {
+        const bm = BM.create(opts);
+        const m = bm.morph({ from: els.from, to: els.to });
+        return { progress: p => m.progress(p), invalidate: () => m.invalidate(), destroy: () => bm.destroy() };
+      }
+    }
+  }, {
+    id: 'blackhole-morph', num: '04', name: 'BlackHoleMorph', version: '1.0.0', global: 'BlackHoleMorph', varName: 'bh', hasIntro: false,
+    file: 'effects/blackhole-morph.js', filename: 'blackhole-morph.js',
+    tagline: 'Content spirals into a black hole and a white hole throws out the next.',
+    desc: 'A black hole with a glowing accretion disk opens between the two elements. The source breaks into tiles that spiral in, stretching and reddening near the horizon. The hole collapses in a flash and a white hole throws the target back out.',
+    tags: ['Canvas 2D', 'Scroll-driven', 'Tile spiral', 'Spaghettification'],
+    demoStart: {},
+    controls: [
+      { key: 'direction', type: 'select', options: ['cw', 'ccw'], def: 'cw' },
+      { key: 'position', label: 'Hole at', type: 'select', options: ['between', 'viewport'], def: 'between' },
+      { key: 'ease', type: 'select', options: ['in', 'inOut', 'sine', 'linear'], def: 'in' },
+      { key: 'spin', type: 'range', min: 0, max: 4, step: 0.1, def: 1.2 },
+      { key: 'stretch', type: 'range', min: 0, max: 6, step: 0.1, def: 2.5 },
+      { key: 'tile', label: 'Tile px', type: 'range', min: 4, max: 24, step: 1, def: 10 },
+      { key: 'stagger', type: 'range', min: 0, max: 0.9, step: 0.05, def: 0.5 },
+      { key: 'tilt', label: 'Disk tilt', type: 'range', min: 0.05, max: 1, step: 0.05, def: 0.28 },
+      { key: 'redshift', type: 'range', min: 0, max: 1, step: 0.05, def: 0.7 },
+      { key: 'blueshift', type: 'range', min: 0, max: 1, step: 0.05, def: 0.5 },
+      { key: 'flash', type: 'switch', def: true }
+    ],
+    usageCall: "bh.scroll({ from: '#a h2', to: '#b h2' });   // falls in as #b scrolls in",
+    api: [
+      { sig: 'BlackHoleMorph.create(options)', desc: 'Creates an instance. Options become defaults for every morph it runs.' },
+      { sig: 'bh.scroll({ from, to, trigger, edge, start, end })', desc: 'Scroll-scrubbed morph. start / end are viewport fractions for the trigger edge.' },
+      { sig: 'bh.morph({ from, to }).progress(p)', desc: 'Manual control. Drive p from 0 to 1 yourself.' },
+      { sig: 'bh.play({ from, to, duration, delay })', desc: 'Timed morph. Returns a Promise.' },
+      { sig: 'bh.refresh() · bh.destroy()', desc: 'Re-snapshot after layout changes. Tear down layers and listeners.' }
+    ],
+    options: [
+      ['size', "'auto'", 'Event-horizon radius, px. auto = 6% of the smaller viewport side (28–72px).'],
+      ['position', "'between'", "Where the hole opens: 'between' | 'viewport' | [fx, fy] viewport fractions."],
+      ['spin', '1.2', 'Turns a tile makes on its way in.'],
+      ['direction', "'cw'", "'cw' | 'ccw'."],
+      ['stretch', '2.5', 'Spaghettification: how far tiles stretch along their orbit near the horizon.'],
+      ['tile', '10', 'Tile size, px.'],
+      ['stagger', '0.5', 'How spread out departures are, 0–0.9. Nearest tiles fall first.'],
+      ['diskColors', "['#fff4d6', …]", 'Accretion disk colours, inner → outer.'],
+      ['tilt', '0.28', 'Disk squash. 0.05 = edge-on, 1 = face-on.'],
+      ['redshift', '0.7', 'Tint toward red as tiles fall in.'],
+      ['blueshift', '0.5', 'Tint toward blue-white as tiles fly out.'],
+      ['flash', 'true', 'Flash when the hole collapses.'],
+      ['ease', "'in'", 'Fall ease; the outflow plays it in reverse.'],
+      ['pad', '4', 'px of margin captured around each element.'],
+      ['maxDpr', '2', 'Caps canvas pixel ratio.'],
+      ['zIndex', '45', 'Stacking order of the effect layer.'],
+      ['hideContent', 'true', 'Hide real from / to content while the morph runs.'],
+      ['respectReducedMotion', 'true', 'Cross-fades instead when the OS asks for reduced motion.']
+    ].map(([key, def, desc]) => ({ key, def, desc })),
+    demo: {
+      create(BH, opts, els) {
+        const bh = BH.create(opts);
+        const m = bh.morph({ from: els.from, to: els.to });
+        return { progress: p => m.progress(p), invalidate: () => m.invalidate(), destroy: () => bh.destroy() };
+      }
+    }
+  }, {
+    id: 'portal-morph', num: '05', name: 'PortalMorph', version: '1.0.0', global: 'PortalMorph', varName: 'pt', hasIntro: false,
+    file: 'effects/portal-morph.js', filename: 'portal-morph.js',
+    tagline: 'Content sinks through a portal and steps out of another.',
+    desc: 'A portal opens around the source, which sinks through it into the void as the portal closes. A second portal opens around the target, which pushes out toward the viewer and settles. Spark ring, neon ring or jagged rift.',
+    tags: ['Canvas 2D', 'Scroll-driven', '3 portal styles', 'Sparks'],
+    demoStart: {},
+    controls: [
+      { key: 'style', type: 'select', options: ['sparks', 'ring', 'rift'], def: 'sparks' },
+      { key: 'color', type: 'select', options: [{ value: '#ff9a2e', label: 'Ember' }, { value: '#00f0ff', label: 'Cyan' }, { value: '#ff2bd6', label: 'Magenta' }, { value: '#3dff9a', label: 'Acid' }], def: '#ff9a2e' },
+      { key: 'direction', type: 'select', options: ['cw', 'ccw'], def: 'cw' },
+      { key: 'size', type: 'range', min: 0.5, max: 1.6, step: 0.05, def: 1 },
+      { key: 'tilt', type: 'range', min: 0, max: 1, step: 0.05, def: 0 },
+      { key: 'sparks', type: 'range', min: 0, max: 400, step: 10, def: 140 },
+      { key: 'spin', type: 'range', min: 0, max: 3, step: 0.1, def: 1 },
+      { key: 'twist', type: 'range', min: 0, max: 3, step: 0.1, def: 0.7 },
+      { key: 'dual', label: 'Both open', type: 'switch', def: false }
+    ],
+    usageCall: "pt.scroll({ from: '#a .card', to: '#b .card' });   // steps through as #b scrolls in",
+    api: [
+      { sig: 'PortalMorph.create(options)', desc: 'Creates an instance. Options become defaults for every morph it runs.' },
+      { sig: 'pt.scroll({ from, to, trigger, edge, start, end })', desc: 'Scroll-scrubbed morph. start / end are viewport fractions for the trigger edge.' },
+      { sig: 'pt.morph({ from, to }).progress(p)', desc: 'Manual control. Drive p from 0 to 1 yourself.' },
+      { sig: 'pt.play({ from, to, duration, delay })', desc: 'Timed morph. Returns a Promise.' },
+      { sig: 'pt.refresh() · pt.destroy()', desc: 'Re-snapshot after layout changes. Tear down layers and listeners.' }
+    ],
+    options: [
+      ['style', "'sparks'", "'sparks' (spinning spark ring) | 'ring' (clean neon ring) | 'rift' (jagged tear)."],
+      ['color', "'#ff9a2e'", 'Portal colour.'],
+      ['voidColor', "'#05050a'", 'Colour seen through the portal.'],
+      ['size', '1', 'Portal radius relative to the circle that encloses the element.'],
+      ['tilt', '0', '0 = facing the viewer, 1 = lying almost flat.'],
+      ['sparks', '140', "Sparks per portal. 'ring' and 'rift' use fewer."],
+      ['spin', '1', 'Ring and spark rotation speed.'],
+      ['direction', "'cw'", "'cw' | 'ccw'."],
+      ['twist', '0.7', 'Radians the content turns as it sinks and emerges.'],
+      ['dual', 'false', 'Open both portals at once, so content passes straight between them.'],
+      ['ease', "'inOut'", 'Sink ease. Emerging uses a slight overshoot.'],
+      ['pad', '4', 'px of margin captured around each element.'],
+      ['maxDpr', '2', 'Caps canvas pixel ratio.'],
+      ['zIndex', '45', 'Stacking order of the effect layer.'],
+      ['hideContent', 'true', 'Hide real from / to content while the morph runs.'],
+      ['respectReducedMotion', 'true', 'Cross-fades instead when the OS asks for reduced motion.']
+    ].map(([key, def, desc]) => ({ key, def, desc })),
+    demo: {
+      create(PT, opts, els) {
+        const pt = PT.create(opts);
+        const m = pt.morph({ from: els.from, to: els.to });
+        return { progress: p => m.progress(p), invalidate: () => m.invalidate(), destroy: () => pt.destroy() };
+      }
+    }
+  }, {
+    id: 'water-morph', num: '06', name: 'WaterMorph', version: '1.0.0', global: 'WaterMorph', varName: 'wm', hasIntro: false,
+    file: 'effects/water-morph.js', filename: 'water-morph.js',
+    tagline: 'Content melts into liquid that flows across and fills the next element.',
+    desc: 'The source melts and drips. Drops that take its colours break away, merge and split as they flow to the target, which rises behind a wavy waterline, tinted by the liquid, then ripples and settles.',
+    tags: ['Canvas 2D', 'Scroll-driven', 'Metaball liquid', 'Ripples'],
+    demoStart: {},
+    controls: [
+      { key: 'color', label: 'Liquid', type: 'select', options: [{ value: 'source', label: 'Source' }, { value: '#3ab8ff', label: 'Water' }, { value: '#00f0ff', label: 'Cyan' }, { value: '#ff2bd6', label: 'Magenta' }], def: 'source' },
+      { key: 'path', type: 'select', options: ['arc', 'stream', 'splash'], def: 'arc' },
+      { key: 'blobs', label: 'Drops', type: 'range', min: 10, max: 200, step: 5, def: 70 },
+      { key: 'blobSize', label: 'Drop size', type: 'range', min: 4, max: 24, step: 1, def: 10 },
+      { key: 'viscosity', type: 'range', min: 0, max: 1, step: 0.05, def: 0.5 },
+      { key: 'arc', type: 'range', min: 0, max: 1, step: 0.05, def: 0.35 },
+      { key: 'ripples', type: 'range', min: 0, max: 16, step: 1, def: 6 },
+      { key: 'gloss', type: 'range', min: 0, max: 1, step: 0.05, def: 0.6 },
+      { key: 'tint', type: 'range', min: 0, max: 1, step: 0.05, def: 0.6 },
+      { key: 'brighten', type: 'range', min: 0, max: 1, step: 0.05, def: 0.2 }
+    ],
+    usageCall: "wm.scroll({ from: '#a .card', to: '#b .card' });   // pours across as #b scrolls in",
+    api: [
+      { sig: 'WaterMorph.create(options)', desc: 'Creates an instance. Options become defaults for every morph it runs.' },
+      { sig: 'wm.scroll({ from, to, trigger, edge, start, end })', desc: 'Scroll-scrubbed morph. start / end are viewport fractions for the trigger edge.' },
+      { sig: 'wm.morph({ from, to }).progress(p)', desc: 'Manual control. Drive p from 0 to 1 yourself.' },
+      { sig: 'wm.play({ from, to, duration, delay })', desc: 'Timed morph. Returns a Promise.' },
+      { sig: 'wm.refresh() · wm.destroy()', desc: 'Re-snapshot after layout changes. Tear down layers and listeners.' }
+    ],
+    options: [
+      ['color', "'source'", "Liquid colour: 'source' (sampled from the content) | any CSS colour."],
+      ['brighten', '0.2', 'Lifts sampled colours toward white so the liquid reads on dark grounds.'],
+      ['blobs', '70', 'Drops in flight.'],
+      ['blobSize', '10', 'Base drop radius, px.'],
+      ['viscosity', '0.5', '0 = runny, short drips. 1 = thick, long stretchy drips.'],
+      ['path', "'arc'", "'arc' (leaps across) | 'stream' (tight, regular) | 'splash' (scattered arcs)."],
+      ['arc', '0.35', 'Arc height, fraction of the distance.'],
+      ['ripples', '6', 'Ripple amplitude as the target settles, px.'],
+      ['gloss', '0.6', "Highlight on the liquid's upper edges."],
+      ['tint', '0.6', 'How strongly the rising target is tinted by the liquid.'],
+      ['resolution', '0.5', 'Liquid render scale. Lower is faster and softer.'],
+      ['ease', "'sine'", 'Drop flight ease: sine | inOut | out | in | linear | function(t).'],
+      ['pad', '4', 'px of margin captured around each element.'],
+      ['maxDpr', '2', 'Caps canvas pixel ratio.'],
+      ['zIndex', '45', 'Stacking order of the effect layer.'],
+      ['hideContent', 'true', 'Hide real from / to content while the morph runs.'],
+      ['respectReducedMotion', 'true', 'Cross-fades instead when the OS asks for reduced motion.']
+    ].map(([key, def, desc]) => ({ key, def, desc })),
+    demo: {
+      create(WM, opts, els) {
+        const wm = WM.create(opts);
+        const m = wm.morph({ from: els.from, to: els.to });
+        return { progress: p => m.progress(p), invalidate: () => m.invalidate(), destroy: () => wm.destroy() };
+      }
+    }
   }];
 
   state = { active: 'particle-morph', vals: null, p: 0.42, tab: 'usage', fromText: 'SIGNAL', toText: 'RECEIVED', source: '', copied: false, playing: false, scene: 'text', layout: 'h', image: (() => { try { return localStorage.getItem('motionlab.image') || ''; } catch (e) { return ''; } })() };
