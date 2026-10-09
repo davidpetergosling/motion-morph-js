@@ -1,15 +1,15 @@
 /*!
- * PixelSortMorph v1.0 — scroll-driven pixel-sort transitions between DOM content. Canvas 2D, no dependencies.
+ * TeleporterMorph v1.0 — scroll-driven teleporter transitions between DOM content. Canvas 2D, no dependencies.
  *
- *   const ps = PixelSortMorph.create({ direction: 'down' });
- *   ps.scroll({ from: '#a .card', to: '#b .card' });                  // scroll-scrubbed
- *   ps.scroll({ from: '#s1 h2', to: '#s2 h2', trigger: '#s1', edge: 'bottom', start: .667, end: .2 });
- *   const m = ps.morph({ from: x, to: y }); m.progress(0.5);           // manual control
- *   ps.play({ from: x, to: y, duration: 2600 });                       // timed, returns a Promise
+ *   const tp = TeleporterMorph.create({ color: '#9fd8ff' });
+ *   tp.scroll({ from: '#a .card', to: '#b .card' });                  // scroll-scrubbed
+ *   tp.scroll({ from: '#s1 h2', to: '#s2 h2', trigger: '#s1', edge: 'bottom', start: .667, end: .2 });
+ *   const m = tp.morph({ from: x, to: y }); m.progress(0.5);           // manual control
+ *   tp.play({ from: x, to: y, duration: 3000 });                       // timed, returns a Promise
  *
- * The source's pixels are sorted by brightness along each column (or row), starting with the brightest
- * runs and spreading as the threshold drops, until the content smears into streaks. The streaks slide
- * across to the target, trailing after-images, and the target unsorts back into place.
+ * A column of light switches on over the source. The content shimmers in flickering bands, washes into
+ * the beam colour and dissolves into a cloud of twinkling sparkles, which fade as the beam powers down.
+ * The same thing plays in reverse at the target, which materialises out of the sparkles.
  * Real content is hidden while the morph runs. Per-morph specs accept any option to override defaults.
  */
 (function (root) {
@@ -28,54 +28,51 @@
   var $ = function (x) { return typeof x === 'string' ? Array.prototype.slice.call(document.querySelectorAll(x)) : x == null ? [] : x.length != null && !x.nodeType ? Array.prototype.slice.call(x) : [x]; };
 
   var DEFAULTS = {
-    direction: 'down',        // sort direction: 'down' | 'up' | 'right' | 'left'
-    threshold: 0.15,          // brightness floor at full sort: darker pixels never sort (0–1)
-    stretch: 0.6,             // how far streaks run past the element, as a fraction of its size
-    trails: 3,                // after-images while the streaks travel
-    ease: 'inOut',            // sort and travel ease
-    pad: 0,                   // px of margin captured around each element
-    maxPixels: 120000,        // per-element pixel budget for sorting
+    color: '#9fd8ff',         // beam and sparkle colour
+    sparkles: 420,            // sparkles per element
+    sparkleSize: 2.5,         // sparkle size, px
+    shimmer: 1,               // strength of the flickering bands (0–1.5)
+    band: 3,                  // shimmer band height, px
+    beam: true,               // column of light over the element
+    pads: true,               // bright emitter lines above and below the element
+    rise: 16,                 // px sparkles drift upward while they hang
+    rate: 60,                 // flicker frames over the whole morph
+    ease: 'inOut',            // content fade ease
+    pad: 6,                   // px of margin captured around each element
+    maxPixels: 600000,        // per-element snapshot pixel budget
     maxDpr: 2,
     zIndex: 45,
     hideContent: true,        // hide real from/to content while the morph runs
     respectReducedMotion: true
   };
-  var LEVELS = 24;   // sort amounts are cached at this many steps
 
-  // Sorted copy of a snapshot at amount a (0–1). Runs of pixels brighter than the threshold are sorted
-  // bright → dark along the sort direction and stretched past the element by up to E pixels.
-  function sortImage(sh, a, o) {
-    var dir = o.direction, vert = dir !== 'right' && dir !== 'left', rev = dir === 'up' || dir === 'left';
-    var w = sh.w, h = sh.h, L = vert ? h : w, N = vert ? w : h, E = sh.E, OL = L + E, cw = vert ? w : OL, chh = vert ? OL : h;
-    var c = mkCanvas(cw, chh), g = c.getContext('2d'), img = g.createImageData(cw, chh), out = img.data, d = sh.data.data;
-    var thr = (1 - a * (1 - clamp(o.threshold))) * 255, lr = new Uint8Array(L), lg = new Uint8Array(L), lb = new Uint8Array(L), la = new Uint8Array(L), lB = new Float32Array(L);
-    function put(i, k, s, fa) {
-      if (k >= OL) return;
-      var kk = rev ? OL - 1 - k : k, oi = (vert ? kk * cw + i : i * cw + kk) * 4;
-      out[oi] = lr[s]; out[oi + 1] = lg[s]; out[oi + 2] = lb[s]; out[oi + 3] = la[s] * (fa == null ? 1 : fa);
-    }
-    for (var i = 0; i < N; i++) {
-      for (var k = 0; k < L; k++) {
-        var kk = rev ? L - 1 - k : k, si = (vert ? kk * w + i : i * w + kk) * 4;
-        lr[k] = d[si]; lg[k] = d[si + 1]; lb[k] = d[si + 2]; la[k] = d[si + 3];
-        lB[k] = la[k] ? (d[si] * 0.299 + d[si + 1] * 0.587 + d[si + 2] * 0.114) : -1;
-        put(i, k, k);
-      }
-      if (a <= 0) continue;
-      k = 0;
-      while (k < L) {
-        if (lB[k] < thr) { k++; continue; }
-        var k0 = k; while (k < L && lB[k] >= thr) k++;
-        var len = k - k0; if (len < 2) continue;
-        var ord = []; for (var j = k0; j < k; j++) ord.push(j);
-        ord.sort(function (x, y) { return lB[y] - lB[x]; });
-        var nl = len + Math.round(a * E * Math.min(1, len / (L * 0.25)));
-        // Streaks taper out past the end of the original run.
-        for (j = 0; j < nl; j++) put(i, k0 + j, ord[Math.floor(j * len / nl)], j < len ? 1 : Math.pow(1 - (j - len) / (nl - len), 1.5));
-      }
-    }
-    g.putImageData(img, 0, 0);
+  // A four-point glint: soft glow plus a thin cross.
+  function glint(rgb) {
+    var R = 24, c = mkCanvas(R * 2, R * 2), g = c.getContext('2d'), gr = g.createRadialGradient(R, R, 0, R, R, R * 0.6);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.3, rgba(rgb, 0.8)); gr.addColorStop(1, rgba(rgb, 0));
+    g.fillStyle = gr; g.fillRect(0, 0, R * 2, R * 2);
+    g.globalCompositeOperation = 'lighter'; g.strokeStyle = rgba(rgb, 0.9); g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(R, 2); g.lineTo(R, R * 2 - 2); g.moveTo(2, R); g.lineTo(R * 2 - 2, R); g.stroke();
     return c;
+  }
+  // The light column: brightest down the middle, fading at the sides and toward the top and bottom.
+  function beamImage(rgb) {
+    var w = 64, h = 128, c = mkCanvas(w, h), g = c.getContext('2d'), id = g.createImageData(w, h);
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var u = x / (w - 1), v = y / (h - 1), hx = Math.pow(Math.sin(PI * u), 1.5), vy = clamp(Math.min(v, 1 - v) / 0.25), i = (y * w + x) * 4;
+      id.data[i] = rgb[0]; id.data[i + 1] = rgb[1]; id.data[i + 2] = rgb[2]; id.data[i + 3] = 255 * 0.28 * hx * vy * vy * (3 - 2 * vy);
+    }
+    g.putImageData(id, 0, 0); return c;
+  }
+  // Points on the opaque parts of a snapshot (or anywhere in it when its pixels can't be read).
+  function points(sh, n, R) {
+    var d = sh.data && sh.data.data, out = [], tries = 0;
+    while (out.length < n && tries++ < n * 30) {
+      var x = R() * sh.W, y = R() * sh.H;
+      if (d) { var i = ((Math.floor(y * sh.h / sh.H) * sh.w) + Math.floor(x * sh.w / sh.W)) * 4; if (d[i + 3] < 40) continue; }
+      out.push([x, y, R(), R()]);
+    }
+    return out;
   }
 
   function mkCanvas(w, h) { var c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
@@ -175,32 +172,52 @@
       ctx.globalAlpha = clamp(1 - p * 2); ctx.drawImage(S.tex, S.ox, S.oy, S.W, S.H);
       ctx.globalAlpha = clamp(p * 2 - 1); ctx.drawImage(T.tex, T.ox, T.oy, T.W, T.H); ctx.globalAlpha = 1;
     }
-    function sorted(m, sh, a) {
-      var lvl = Math.round(clamp(a) * LEVELS);
-      return sh.cache[lvl] || (sh.cache[lvl] = sortImage(sh, lvl / LEVELS, m.o));
-    }
-    // Where the sorted image (element + streak extension) sits on screen.
-    function rect(m, sh) {
-      var dir = m.o.direction, vert = dir !== 'right' && dir !== 'left', rev = dir === 'up' || dir === 'left', e = sh.E * sh.W / sh.w;
-      return vert ? [sh.ox, sh.oy - (rev ? e : 0), sh.W, sh.H + e] : [sh.ox - (rev ? e : 0), sh.oy, sh.W + e, sh.H];
+    // One element (de)materialising. u: 0 = solid, 1 = gone. f: flicker frame.
+    function beamIn(m, sh, u, f) {
+      var mo = m.o, c = m.rgb, hot = m.hot, x = sh.ox, y = sh.oy, W = sh.W, H = sh.H;
+      var beamA = mo.beam ? EASE.out(win(u, 0, 0.18)) * (1 - EASE.in(win(u, 0.8, 1))) : 0, tk = win(u, 0.08, 0.42);
+      var cA = 1 - m.ease(win(u, 0.25, 0.7)), sA = EASE.out(win(u, 0.1, 0.35)) * (1 - EASE.in(win(u, 0.7, 0.98))), sh2 = clamp(mo.shimmer / 1.5) * Math.sin(PI * win(u, 0.02, 0.75));
+      if (beamA > 0.01) {
+        var bx = x - W * 0.12, bw = W * 1.24, by = y - H * 0.5, bh = H * 2;
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = beamA; ctx.drawImage(m.beamImg, bx, by, bw, bh); ctx.globalAlpha = 1;
+        if (mo.pads) {
+          ctx.globalCompositeOperation = 'lighter';
+          [y - 6, y + H + 6].forEach(function (yy) {
+            [[8, 0.12], [3, 0.4], [1.2, 0.95]].forEach(function (L) { ctx.strokeStyle = rgba(L[1] > 0.5 ? hot : c, L[1] * beamA); ctx.lineWidth = L[0]; ctx.beginPath(); ctx.moveTo(bx + bw * 0.15, yy); ctx.lineTo(bx + bw * 0.85, yy); ctx.stroke(); });
+          });
+        }
+        ctx.restore();
+      }
+      if (cA > 0.01) {
+        var band = Math.max(1, +mo.band || 3), ky = sh.h / sh.H;
+        for (var yy = 0; yy < H; yy += band) {
+          var hh = Math.min(band, H - yy), row = yy / band | 0, a = cA * (1 - sh2 * 0.8 * hash(row, f, 3)), dx = (hash(row, f, 9) - 0.5) * 6 * sh2;
+          ctx.globalAlpha = a * (1 - tk); ctx.drawImage(sh.tex, 0, yy * ky, sh.w, hh * ky, x + dx, y + yy, W, hh);
+          if (tk > 0.01) { ctx.globalAlpha = a * tk; ctx.drawImage(sh.lit, 0, yy * ky, sh.w, hh * ky, x + dx, y + yy, W, hh); }
+        }
+        ctx.globalAlpha = 1;
+      }
+      if (sA > 0.01) {
+        ctx.save(); ctx.globalCompositeOperation = 'lighter';
+        var s = mo.sparkleSize, rise = mo.rise;
+        sh.pts.forEach(function (q, i) {
+          var tw = hash(i, f, 5), a = sA * (0.25 + 0.75 * tw * tw); if (a < 0.03) return;
+          var r = s * (0.6 + 1.4 * hash(i, f, 7)) * 2;
+          ctx.globalAlpha = a; ctx.drawImage(m.glint, x + q[0] - r, y + q[1] - rise * u * q[2] - r, r * 2, r * 2);
+        });
+        ctx.restore();
+      }
     }
     function setup(m) {
-      var mo = m.o, vert = mo.direction !== 'right' && mo.direction !== 'left';
-      if (!m.S.data || !m.T.data) return false;
-      [m.S, m.T].forEach(function (sh) { sh.E = Math.round((vert ? sh.h : sh.w) * Math.max(0, +mo.stretch || 0)); sh.cache = []; });
+      var mo = m.o, R = rng(17), n = Math.max(0, Math.round(mo.sparkles));
+      m.rgb = rgbOf(mo.color); m.hot = m.rgb.map(function (v) { return Math.round(lerp(v, 255, 0.7)); }); m.glint = glint(m.rgb); m.beamImg = beamImage(m.rgb);
+      [m.S, m.T].forEach(function (sh) { sh.lit = tinted(sh.tex, mo.color, 0.5); sh.pts = points(sh, n, R); });
       return true;
     }
     function draw(m, p) {
-      var S = m.S, T = m.T, rs = rect(m, S), rt = rect(m, T);
-      if (p < 0.35) { var c = sorted(m, S, m.ease(win(p, 0, 0.38))); ctx.drawImage(c, rs[0], rs[1], rs[2], rs[3]); return; }
-      if (p > 0.65) { var c2 = sorted(m, T, 1 - m.ease(win(p, 0.62, 1))); ctx.drawImage(c2, rt[0], rt[1], rt[2], rt[3]); return; }
-      var cs = sorted(m, S, 1), ct = sorted(m, T, 1), u = m.ease(win(p, 0.35, 0.65)), n = Math.max(0, Math.round(m.o.trails));
-      for (var k = n; k >= 0; k--) {
-        var uk = clamp(u - k * 0.05 * Math.sin(PI * u)), a = k ? 0.35 / k : 1, r = rs.map(function (v, i) { return lerp(v, rt[i], uk); });
-        ctx.globalAlpha = a * (1 - uk); ctx.drawImage(cs, r[0], r[1], r[2], r[3]);
-        ctx.globalAlpha = a * uk; ctx.drawImage(ct, r[0], r[1], r[2], r[3]);
-      }
-      ctx.globalAlpha = 1;
+      var f = Math.floor(p * (+m.o.rate || 60));
+      if (p < 0.5) beamIn(m, m.S, p / 0.5, f);
+      else beamIn(m, m.T, 1 - (p - 0.5) / 0.5, f);
     }
 
     function Morph(spec) {
@@ -259,7 +276,7 @@
       },
       play: function (spec) {
         ensureLayer(); var m = new Morph(spec); m.manual = true; morphs.push(m); listen(); m.fades(0);
-        var dur = spec.duration || 2600, delay = spec.delay || 0;
+        var dur = spec.duration || 3000, delay = spec.delay || 0;
         return new Promise(function (res) {
           if (reduced) { m.p = 1; m.fades(1); return res(m); }
           var t0 = null;
@@ -281,5 +298,5 @@
   }
 
   var api = { create: create, version: '1.0.0' };
-  if (typeof module === 'object' && module.exports) module.exports = api; else root.PixelSortMorph = api;
+  if (typeof module === 'object' && module.exports) module.exports = api; else root.TeleporterMorph = api;
 })(typeof window !== 'undefined' ? window : this);

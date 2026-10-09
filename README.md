@@ -15,7 +15,10 @@ Scroll-driven morph effects that move content from one DOM element to another. E
 | **GlitchMorph** | [effects/glitch-morph.js](effects/glitch-morph.js) | The colour channels split apart, slices tear sideways, then a burst of digital noise reveals the target. |
 | **InkMorph** | [effects/ink-morph.js](effects/ink-morph.js) | The source dissolves like ink in water. Soft clouds drift across and condense as the target. |
 | **SandMorph** | [effects/sand-morph.js](effects/sand-morph.js) | The source crumbles into grains that pour across and pile up into the target from the bottom. |
-| **PixelSortMorph** | [effects/pixelsort-morph.js](effects/pixelsort-morph.js) | The pixels sort by brightness into streaks, which slide across and unsort as the target. |
+| **TeleporterMorph** | [effects/teleporter-morph.js](effects/teleporter-morph.js) | A beam of light switches on and the source shimmers into sparkles. The target beams in the same way. |
+| **BubbleMorph** | [effects/bubble-morph.js](effects/bubble-morph.js) | The source floats off in soap bubbles, each carrying a magnified piece of the content. They pop into place as the target. |
+| **ElectricityMorph** | [effects/electricity-morph.js](effects/electricity-morph.js) | Arcs crackle over the source, then a branching lightning bolt zaps it across and the target flickers on. |
+| **SmokeBombMorph** | [effects/smokebomb-morph.js](effects/smokebomb-morph.js) | A smoke bomb hides the source. A trail of puffs dashes across, and the target appears as a second bomb clears. |
 
 Every effect can be scrubbed by scroll, run on a timer, or driven by hand, and respects `prefers-reduced-motion` by default.
 
@@ -232,20 +235,52 @@ Every effect except ParticleMorph and OrigamiMorph also takes these options:
 | `gravity` / `drop` / `spread` | `1` / `90` / `40` | How far grains fall first, how far in px they drop onto the target, and how far the stream scatters sideways in px. |
 | `ease` | `'inOut'` | Grain flight ease. |
 
-### PixelSortMorph
+### TeleporterMorph
 
 | Option | Default | Notes |
 | --- | --- | --- |
-| `direction` | `'down'` | Sort direction: `'down'` \| `'up'` \| `'right'` \| `'left'` |
-| `threshold` | `0.15` | Pixels darker than this never sort, even at full sort (0–1). |
-| `stretch` / `trails` | `0.6` / `3` | How far the streaks run past the element (as a fraction of its size), and how many after-images trail behind as they travel. |
-| `ease` | `'inOut'` | Sort and travel ease. |
+| `color` | `'#9fd8ff'` | Colour of the beam and sparkles. |
+| `sparkles` / `sparkleSize` / `rise` | `420` / `2.5` / `16` | Sparkles per element, their size in px, and how far in px they drift upward. |
+| `shimmer` / `band` | `1` / `3` | Strength of the flickering bands (0–1.5), and their height in px. |
+| `beam` / `pads` | `true` / `true` | The column of light, and the bright lines above and below the element. |
+| `rate` | `60` | Flicker frames over the whole morph. |
 
-BurnMorph, WaterMorph, InkMorph, SandMorph and PixelSortMorph read the content's pixels. If an element contains a cross-origin image, the browser blocks this, and those effects fall back to a crossfade.
+### BubbleMorph
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `bubble` | `22` | Grid cell size in px. The bubbles are slightly larger, so they overlap. |
+| `rise` / `wobble` | `120` / `1` | How far in px bubbles float up as they leave (and rise into place at the end), and how much they wander and wobble. |
+| `magnify` / `iridescence` / `colors` | `1.15` / `0.6` / `['#00f0ff', '#ff2bd6', '#ffe14d']` | How much the bubbles magnify the content, and the strength and colours of the rainbow rim. |
+| `stagger` / `pop` | `0.32` / `true` | How spread out the departures are (top rows leave first), and the pop with droplets when bubbles land. |
+| `ease` | `'sine'` | Flight ease. |
+
+### ElectricityMorph
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `color` | `'#8fd3ff'` | Electric colour. |
+| `arcs` / `branches` | `10` / `3` | Arcs crackling over an element at full charge, and side branches on the main bolt. |
+| `jag` / `width` | `1` / `2` | How jagged the bolts are, and the width of the bolt's bright core in px. |
+| `sparks` / `flicker` / `flash` | `140` / `1` / `true` | Sparks that race along the bolt, how much the content flickers, and a screen flash when the bolt strikes. |
+| `rate` | `50` | How many times the bolts are redrawn over the whole morph. The bolts are generated from the progress value, so scrubbing back and forth gives the same bolts every time. |
+
+### SmokeBombMorph
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `color` / `shade` | `'#cfcbd9'` / `'#5d5870'` | Colours for the light and shadow sides of the smoke. |
+| `puffs` / `size` / `density` | `60` / `1` / `0.85` | Smoke puffs per bomb, cloud size relative to the element, and how opaque the smoke is. |
+| `drift` | `40` | How far in px the smoke rises as it clears. |
+| `flash` / `flashColor` / `sparks` | `true` / `'#ffd9a0'` / `20` | The flash when each bomb goes off, its colour, and the sparks it sprays. |
+| `trail` | `true` | A trail of puffs dashing from the source to the target. |
+| `ease` | `'out'` | Smoke expansion ease. |
+
+BurnMorph, WaterMorph, InkMorph and SandMorph read the content's pixels. If an element contains a cross-origin image, the browser blocks this, and those effects fall back to a crossfade.
 
 ## Demo pages
 
-- **index.html (Motion Lab)** is an effect explorer and the demo site's homepage. It includes all twelve effects. Pick an effect, tune its options with live controls, then copy the generated usage snippet, browse the options and source, or download the file.
+- **index.html (Motion Lab)** is an effect explorer and the demo site's homepage. It includes all fifteen effects. Pick an effect, tune its options with live controls, then copy the generated usage snippet, browse the options and source, or download the file.
 - **[Paper Plane Page.dc.html](https://davidpetergosling.github.io/motion-morph-js/Paper%20Plane%20Page.dc.html)** is a sample landing page that uses OrigamiMorph between sections.
 
 You can try both pages on the [live demo site](https://davidpetergosling.github.io/motion-morph-js/). Both are built with the Neon Grid design system in `_ds/` and the `support.js` runtime. `image-slot.js` provides a drop-in `<image-slot>` image placeholder. To run them locally, serve the folder over HTTP rather than opening it from `file://`, because the pages fetch local files:
