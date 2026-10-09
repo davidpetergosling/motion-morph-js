@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/motion.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/components.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/styles.css">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/_ds_bundle.js"></script>
+  <style>
+    body { margin: 0; background: var(--bg-app); }
+    a { color: var(--link); }
+    a:hover { color: var(--link-hover); }
+  </style>
+</helmet>
+<div style="min-height: 100vh; background: var(--bg-app); color: var(--text-primary); font-family: var(--font-body);">
+  <header style="height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 32px; border-bottom: 1px solid var(--border-default); background: var(--ng-void);">
+    <div style="font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: 0.08em; display: flex; gap: 2px;">
+      <span style="color: var(--ng-cyan); text-shadow: 0 0 14px var(--ng-cyan-a60);">MOTION</span>
+      <span style="color: var(--ng-white);">/</span>
+      <span style="color: var(--ng-magenta); text-shadow: 0 0 14px var(--ng-magenta-a60);">LAB</span>
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--text-muted); text-transform: uppercase; white-space: nowrap;">// {{ libraryCount }} in library</div>
+  </header>
+
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start;">
+    <aside style="flex: 1 1 240px; max-width: 100%; box-sizing: border-box; padding: 32px 24px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--text-muted);">// LIBRARY</div>
+      <sc-for list="{{ effects }}" as="e" hint-placeholder-count="1">
+        <button onClick="{{ e.select }}" style="all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 6px; padding: 16px; background: var(--surface-card); border: 1px solid {{ e.border }}; box-shadow: {{ e.glow }}; clip-path: var(--chamfer-sm); transition: border-color 200ms cubic-bezier(.2,.8,.2,1);" style-hover="border-color: var(--ng-cyan);">
+          <div style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline;">
+            <span style="font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-primary);">{{ e.name }}</span>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">v{{ e.version }}</span>
+          </div>
+          <span style="font-size: 13px; line-height: 1.45; color: var(--text-secondary); text-wrap: pretty;">{{ e.tagline }}</span>
+        </button>
+      </sc-for>
+    </aside>
+
+    <main style="flex: 999 1 640px; min-width: 0; box-sizing: border-box; padding: 32px; display: flex; flex-direction: column; gap: 24px; border-left: 1px solid var(--border-default); min-height: calc(100vh - 57px);">
+      <section style="display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; align-items: flex-end;">
+        <div style="display: flex; flex-direction: column; gap: 12px; flex: 1 1 420px; min-width: 0;">
+          <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--ng-cyan); text-transform: uppercase;">// CLASS {{ fx.num }} · v{{ fx.version }} · {{ size }} · no dependencies</div>
+          <h1 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(36px, 5vw, 56px); line-height: 1; letter-spacing: 0.04em; text-transform: uppercase;">{{ fx.name }}</h1>
+          <p style="margin: 0; max-width: 620px; font-size: 16px; line-height: 1.55; color: var(--text-secondary); text-wrap: pretty;">{{ fx.desc }}</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <sc-for list="{{ fx.tags }}" as="t" hint-placeholder-count="4">
+              <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Tag" hint-size="auto,24px">{{ t }}</x-import>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Button" variant="outline" icon="copy" onClick="{{ copySnippet }}" hint-size="150px,40px">{{ copyLabel }}</x-import>
+          <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Button" variant="primary" icon="download" onClick="{{ download }}" hint-size="150px,40px">Download .js</x-import>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch;">
+        <div style="flex: 3 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--text-muted); margin-right: 4px;">// SCENE</span>
+            <sc-for list="{{ scenes }}" as="sc" hint-placeholder-count="3">
+              <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Button" variant="{{ sc.variant }}" size="sm" onClick="{{ sc.select }}" hint-size="80px,32px">{{ sc.label }}</x-import>
+            </sc-for>
+            <span style="width: 1px; height: 20px; background: var(--border-default); margin: 0 4px;"></span>
+            <sc-for list="{{ layouts }}" as="ly" hint-placeholder-count="2">
+              <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Button" variant="{{ ly.variant }}" size="sm" icon="{{ ly.icon }}" onClick="{{ ly.select }}" hint-size="110px,32px">{{ ly.label }}</x-import>
+            </sc-for>
+            <sc-if value="{{ isImageScene }}">
+              <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Button" variant="ghost" size="sm" icon="image-plus" onClick="{{ pickImage }}" hint-size="130px,32px">{{ pickLabel }}</x-import>
+            </sc-if>
+            <input ref="{{ fileRef }}" type="file" accept="image/*" onChange="{{ onFile }}" style="display: none;">
+          </div>
+          <div style="position: relative; min-height: {{ stageMinH }}; display: flex; flex-direction: {{ stageDir }}; flex-wrap: {{ stageWrap }}; align-items: {{ stageAlign }}; justify-content: space-between; gap: 40px; padding: 56px 48px; box-sizing: border-box; background: var(--surface-sunken); border: 1px solid var(--border-default); clip-path: var(--chamfer-md); overflow: hidden;">
+            <sc-if value="{{ showGrid }}" hint-placeholder-val="{{ true }}">
+              <div style="position: absolute; inset: 0; background-image: var(--pattern-grid); background-size: 32px 32px; pointer-events: none;"></div>
+            </sc-if>
+            <div style="position: absolute; top: 16px; left: 20px; right: 20px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; color: var(--text-muted);">// STAGE — CONTENT IS SAMPLED LIVE</div>
+            <sc-if value="{{ isCardScene }}" hint-placeholder-val="{{ false }}">
+              <div ref="{{ fromRef }}" style="position: relative; width: 260px; box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: var(--ng-surface-1); border: 1px solid var(--ng-cyan); border-radius: 2px;">
+                <span style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--ng-cyan);">// NODE 07</span>
+                <span style="font-family: var(--font-display); font-weight: 700; font-size: 28px; line-height: 1.05; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ng-white);">{{ fromText }}</span>
+                <span style="font-size: 14px; line-height: 1.5; color: var(--ng-fg-2);">Relay online. Latency 12 ms.</span>
+                <div style="height: 4px; background: var(--ng-line);"><div style="width: 62%; height: 4px; background: var(--ng-cyan);"></div></div>
+              </div>
+              <div ref="{{ toRef }}" style="position: relative; width: 320px; box-sizing: border-box; margin-left: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; background: var(--ng-surface-2); border: 1px solid var(--ng-magenta); border-radius: 2px;">
+                <span style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--ng-magenta);">// NODE 12</span>
+                <span style="font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: 1.05; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ng-white);">{{ toText }}</span>
+                <span style="font-size: 14px; line-height: 1.5; color: var(--ng-fg-2);">Uplink secured. 3 relays in sync.</span>
+                <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: var(--ng-magenta);"><span>THROUGHPUT</span><span>2.4 GB/S</span></div>
+                <div style="height: 4px; background: var(--ng-line);"><div style="width: 88%; height: 4px; background: var(--ng-magenta);"></div></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isImageScene }}" hint-placeholder-val="{{ false }}">
+              <div ref="{{ fromRef }}" style="position: relative; width: 260px; height: 190px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: var(--ng-surface-2); border: 1px solid var(--ng-line-strong); border-radius: 2px; overflow: hidden;">
+                <sc-if value="{{ hasImage }}" hint-placeholder-val="{{ false }}">
+                  <img ref="{{ imgRef }}" alt="" onLoad="{{ imageLoaded }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                </sc-if>
+                <sc-if value="{{ noImage }}">
+                  <span style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--ng-fg-3);">// NO IMAGE LOADED</span>
+                </sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isTextFrom }}" hint-placeholder-val="{{ true }}">
+              <div ref="{{ fromRef }}" style="position: relative; display: flex; flex-direction: column; gap: 8px;">
+                <span style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--ng-cyan);">// ORIGIN</span>
+                <span style="font-family: var(--font-display); font-weight: 700; font-size: clamp(40px, 6vw, 80px); line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ng-cyan);">{{ fromText }}</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isTextTo }}" hint-placeholder-val="{{ true }}">
+            <div ref="{{ toRef }}" style="position: relative; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; margin-left: auto;">
+              <span style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--ng-magenta);">// DESTINATION</span>
+              <span style="font-family: var(--font-display); font-weight: 700; font-size: clamp(40px, 6vw, 80px); line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ng-magenta);">{{ toText }}</span>
+              <span data-fx-outline="" style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--ng-magenta); border: 1px solid var(--ng-magenta); border-radius: 2px; padding: 8px 14px;">LINK ESTABLISHED</span>
+            </div>
+            </sc-if>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Button" variant="secondary" size="sm" icon="play" onClick="{{ play }}" disabled="{{ playing }}" hint-size="90px,32px">Play</x-import>
+            <sc-if value="{{ fx.hasIntro }}">
+              <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Button" variant="ghost" size="sm" icon="sparkles" onClick="{{ intro }}" disabled="{{ playing }}" hint-size="90px,32px">Intro</x-import>
+            </sc-if>
+            <input type="range" min="0" max="1" step="0.001" value="{{ p }}" onChange="{{ scrub }}" aria-label="Morph progress" style="flex: 1 1 200px; min-width: 0; accent-color: var(--ng-cyan); height: 32px;">
+            <span style="font-family: var(--font-mono); font-size: 13px; color: var(--ng-cyan); min-width: 64px; text-align: right;">P {{ pLabel }}</span>
+          </div>
+        </div>
+
+        <div style="flex: 1 1 280px; min-width: 0; box-sizing: border-box; padding: 24px; background: var(--surface-card); border: 1px solid var(--border-default); clip-path: var(--chamfer-md); display: flex; flex-direction: column; gap: 20px;">
+          <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--text-muted);">// PARAMETERS</div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+            <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Input" label="From" value="{{ fromText }}" onChange="{{ setFrom }}" hint-size="100%,64px"></x-import>
+            <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Input" label="To" value="{{ toText }}" onChange="{{ setTo }}" hint-size="100%,64px"></x-import>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px 12px;">
+            <sc-for list="{{ controls }}" as="c" hint-placeholder-count="10">
+              <div style="min-width: 0;">
+                <sc-if value="{{ c.isSelect }}">
+                  <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Select" label="{{ c.label }}" options="{{ c.options }}" value="{{ c.value }}" onChange="{{ c.onChange }}" hint-size="100%,64px"></x-import>
+                </sc-if>
+                <sc-if value="{{ c.isRange }}">
+                  <label style="display: flex; flex-direction: column; gap: 6px;">
+                    <span style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary);">
+                      <span>{{ c.label }}</span>
+                      <span style="color: var(--ng-cyan);">{{ c.display }}</span>
+                    </span>
+                    <input type="range" min="{{ c.min }}" max="{{ c.max }}" step="{{ c.step }}" value="{{ c.value }}" onChange="{{ c.onChange }}" style="width: 100%; accent-color: var(--ng-cyan); margin: 0; height: 24px;">
+                  </label>
+                </sc-if>
+                <sc-if value="{{ c.isSwitch }}">
+                  <div style="padding-top: 18px;">
+                    <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Switch" label="{{ c.label }}" checked="{{ c.value }}" onChange="{{ c.onChange }}" hint-size="100%,24px"></x-import>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top: auto;">
+            <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Button" variant="ghost" size="sm" icon="rotate-ccw" onClick="{{ reset }}" hint-size="100px,32px">Reset</x-import>
+          </div>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Tabs" items="{{ tabs }}" value="{{ tab }}" onChange="{{ setTab }}" hint-size="100%,44px"></x-import>
+
+        <sc-if value="{{ isUsage }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-wrap: wrap; gap: 24px;">
+            <div style="flex: 3 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--text-muted);">// YOUR CONFIG — UPDATES WITH PARAMETERS</div>
+              <pre style="margin: 0; padding: 20px; background: var(--surface-sunken); border: 1px solid var(--border-default); font-family: var(--font-mono); font-size: 13px; line-height: 1.6; color: var(--ng-white); overflow: auto; white-space: pre;">{{ snippet }}</pre>
+            </div>
+            <div style="flex: 2 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--text-muted);">// API</div>
+              <sc-for list="{{ fx.api }}" as="a" hint-placeholder-count="5">
+                <div style="display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--border-default);">
+                  <code style="font-family: var(--font-mono); font-size: 13px; color: var(--ng-cyan);">{{ a.sig }}</code>
+                  <span style="font-size: 14px; line-height: 1.5; color: var(--text-secondary); text-wrap: pretty;">{{ a.desc }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isOptions }}">
+          <div style="display: flex; flex-direction: column; border: 1px solid var(--border-default); background: var(--surface-card);">
+            <sc-for list="{{ fx.options }}" as="o" hint-placeholder-count="10">
+              <div style="display: grid; grid-template-columns: minmax(120px, 160px) minmax(100px, 200px) minmax(0, 1fr); gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--border-default); align-items: baseline;">
+                <code style="font-family: var(--font-mono); font-size: 13px; color: var(--ng-cyan);">{{ o.key }}</code>
+                <code style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); overflow-wrap: anywhere;">{{ o.def }}</code>
+                <span style="font-size: 14px; line-height: 1.5; color: var(--text-secondary); text-wrap: pretty;">{{ o.desc }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSource }}">
+          <pre style="margin: 0; padding: 20px; max-height: 560px; background: var(--surface-sunken); border: 1px solid var(--border-default); font-family: var(--font-mono); font-size: 12px; line-height: 1.6; color: var(--text-secondary); overflow: auto; white-space: pre;">{{ source }}</pre>
+        </sc-if>
+      </section>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;playDuration&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2400,&quot;min&quot;:800,&quot;max&quot;:6000,&quot;step&quot;:100,&quot;unit&quot;:&quot;ms&quot;,&quot;tsType&quot;:&quot;number&quot;},&quot;showGrid&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  // Registry — add new effect classes here. Each needs a file, a global, controls, docs and a demo adapter.
+  EFFECTS = [{
+    id: 'particle-morph', num: '01', name: 'ParticleMorph', version: '1.2.0', global: 'ParticleMorph', varName: 'pm', hasIntro: true,
+    file: 'effects/particle-morph.js', filename: 'particle-morph.js',
+    tagline: 'Glowing particle morphs between any DOM content, scrubbed by scroll.',
+    desc: 'Samples real text, images and outlines at their exact layout positions, then flies thousands of glowing dots from one element into another. Scroll-scrubbed, timed, or driven by hand.',
+    tags: ['Canvas 2D', 'Scroll-driven', 'Text + images', 'Reduced-motion aware'],
+    demoStart: { colorMode: 'blend', outlines: '[data-fx-outline]' },
+    palette: ['#00f0ff', '#ff2bd6', '#f5f7ff'],
+    controls: [
+      { key: 'motion', type: 'select', options: ['swirl', 'vortex', 'galaxy', 'explode', 'wave', 'drift', 'direct'], def: 'swirl' },
+      { key: 'colorMode', label: 'Color', type: 'select', options: ['palette', 'source', 'target', 'blend'], def: 'palette' },
+      { key: 'direction', type: 'select', options: ['cw', 'ccw'], def: 'cw' },
+      { key: 'ease', type: 'select', options: ['inOut', 'out', 'in', 'linear', 'expo'], def: 'inOut' },
+      { key: 'scatter', label: 'Intro from', type: 'select', options: ['viewport', 'center', 'edges', 'ring'], def: 'viewport' },
+      { key: 'count', type: 'range', min: 200, max: 3000, step: 100, def: null, demoDef: 1700 },
+      { key: 'size', type: 'range', min: 1, max: 5, step: 0.1, def: 2.6 },
+      { key: 'swirl', type: 'range', min: 0, max: 3, step: 0.1, def: 1.1 },
+      { key: 'wobble', type: 'range', min: 0, max: 400, step: 10, def: 160 },
+      { key: 'stagger', type: 'range', min: 0, max: 0.6, step: 0.02, def: 0.22 },
+      { key: 'glow', type: 'switch', def: true },
+      { key: 'nebula', type: 'switch', def: true }
+    ],
+    usageCall: "pm.scroll({ from: '#a h2', to: '#b h2' });   // scrubs as #b scrolls in",
+    api: [
+      { sig: 'ParticleMorph.create(options)', desc: 'Creates an instance. Options become defaults for every morph it runs.' },
+      { sig: 'pm.scroll({ from, to, trigger, edge, start, end })', desc: 'Scroll-scrubbed morph. start / end are viewport fractions for the trigger edge.' },
+      { sig: 'pm.morph({ from, to }).progress(p)', desc: 'Manual control. Drive p from 0 to 1 yourself.' },
+      { sig: 'pm.play({ to, duration, delay, scatter })', desc: 'Timed build, e.g. a page-load intro. Returns a Promise.' },
+      { sig: 'pm.refresh() · pm.destroy()', desc: 'Re-sample after layout changes. Tear down layers and listeners.' }
+    ],
+    options: [
+      ['count', 'null', 'Dots per morph. null = 1700 desktop, 750 small screens.'],
+      ['colorMode', "'palette'", "'palette' | 'source' | 'target' | 'blend' (source → target)."],
+      ['colors', "['#9184d9', …]", "Colors used by 'palette'."],
+      ['brighten', '0.15', 'Lifts sampled colors toward white so they glow on dark grounds.'],
+      ['motion', "'swirl'", "swirl | vortex | galaxy | explode | wave | drift | direct | function(q)."],
+      ['direction', "'cw'", "'cw' | 'ccw' | 'alternate' (alternates per morph)."],
+      ['center', "'between'", "'between' | 'viewport' | [fx, fy] viewport fractions."],
+      ['swirl', '1.1', 'Rotation strength, radians at mid-flight.'],
+      ['wobble', '160', 'Max per-dot orbit / scatter radius in px.'],
+      ['stagger', '0.22', 'How spread out departures are, 0–1.'],
+      ['ease', "'inOut'", "inOut | out | in | linear | expo | function(t)."],
+      ['step', '3', 'Sampling grid for text and outlines, px.'],
+      ['imageStep', '4', 'Sampling grid for images, px.'],
+      ['size', '2.6', 'Base dot size, px.'],
+      ['glow', 'true', 'Additive blending and soft sprites.'],
+      ['nebula', 'true', 'Rotating conic backlight behind the dots.'],
+      ['maxDpr', '1.5', 'Caps canvas pixel ratio.'],
+      ['zIndex', '45', 'Stacking order of the particle layer.'],
+      ['outlines', "''", "Selector for boxes to trace inside from / to, e.g. '.btn'."],
+      ['fadeFrom', '[0, 0.32]', 'Progress window where source content fades out.'],
+      ['fadeTo', '[0.78, 0.92]', 'Progress window where target content fades in.'],
+      ['hideTarget', 'true', 'Keeps target hidden until its morph starts.'],
+      ['scatter', "'viewport'", "Intro source when there is no 'from': viewport | center | edges | ring."],
+      ['respectReducedMotion', 'true', 'Skips animation when the OS asks for reduced motion.']
+    ].map(([key, def, desc]) => ({ key, def, desc })),
+    demo: {
+      create(PM, opts, els) {
+        const pm = PM.create(opts);
+        const m = pm.morph({ from: els.from, to: els.to });
+        return {
+          progress: p => m.progress(p),
+          invalidate: () => m.invalidate(),
+          intro: d => { m.progress(1); return pm.play({ to: els.to, duration: d }); },
+          destroy: () => pm.destroy()
+        };
+      }
+    }
+  }, {
+    id: 'origami-morph', num: '02', name: 'OrigamiMorph', version: '1.2.0', global: 'OrigamiMorph', varName: 'om', hasIntro: false,
+    file: 'effects/origami-morph.js', filename: 'origami-morph.js',
+    tagline: 'Content folds into a paper plane, flies, and unfolds as the next element.',
+    desc: 'Turns an element into a sheet of paper and folds a classic dart — corners to centre, edges to centre, keel, wings. The plane arcs across the viewport and unfolds as the next element.',
+    tags: ['Canvas 2D', 'Scroll-driven', 'Paper plane', 'Real fold sequence'],
+    demoStart: { paper: '#151526', crease: 'rgba(0,168,194,.55)' },
+    controls: [
+      { key: 'color', label: 'Paper', type: 'select', options: [{ value: '#ece6d6', label: 'Cream' }, { value: '#f5f7ff', label: 'White' }, { value: '#1d1d33', label: 'Void' }], def: '#ece6d6' },
+      { key: 'scale', label: 'Plane size', type: 'range', min: 0.3, max: 1.5, step: 0.05, def: 1 },
+      { key: 'keel', type: 'range', min: 0.05, max: 0.3, step: 0.01, def: 0.13 },
+      { key: 'dihedral', label: 'Wing tilt', type: 'range', min: 0, max: 30, step: 1, def: 8 },
+      { key: 'arc', type: 'range', min: 0, max: 1, step: 0.05, def: 0.5 },
+      { key: 'lift', type: 'range', min: 0, max: 200, step: 5, def: 60 },
+      { key: 'roll', label: 'Bank', type: 'range', min: 0, max: 1, step: 0.05, def: 0.3 },
+      { key: 'rolls', label: 'Barrel rolls', type: 'range', min: 0, max: 3, step: 1, def: 0 },
+      { key: 'loops', type: 'range', min: 0, max: 3, step: 1, def: 0 },
+      { key: 'loopSize', label: 'Loop size', type: 'range', min: 0.4, max: 2, step: 0.1, def: 1 },
+      { key: 'meander', type: 'range', min: 0, max: 6, step: 0.5, def: 0 },
+      { key: 'meanderSize', label: 'Meander px', type: 'range', min: 0, max: 200, step: 5, def: 60 },
+      { key: 'wobble', type: 'range', min: 0, max: 8, step: 0.5, def: 0 },
+      { key: 'wobbleAngle', label: 'Wobble °', type: 'range', min: 0, max: 60, step: 1, def: 20 },
+      { key: 'shade', type: 'range', min: 0, max: 1, step: 0.05, def: 0.7 },
+      { key: 'grain', type: 'range', min: 0, max: 1, step: 0.05, def: 0.35 },
+      { key: 'content', label: 'Print content', type: 'switch', def: false },
+      { key: 'creases', type: 'switch', def: true },
+      { key: 'shadow', type: 'switch', def: true }
+    ],
+    usageCall: "om.scroll({ from: '#a .card', to: '#b .card' });   // folds a plane as #b scrolls in",
+    api: [
+      { sig: 'OrigamiMorph.create(options)', desc: 'Creates an instance. Options become defaults for every morph it runs.' },
+      { sig: 'om.scroll({ from, to, trigger, edge, start, end })', desc: 'Scroll-scrubbed flight. start / end are viewport fractions for the trigger edge.' },
+      { sig: 'om.morph({ from, to }).progress(p)', desc: 'Manual control. Drive p from 0 to 1 yourself.' },
+      { sig: 'om.play({ from, to, duration, delay })', desc: 'Timed flight. Returns a Promise.' },
+      { sig: 'om.refresh() · om.destroy()', desc: 'Re-snapshot after layout changes. Tear down layers and listeners.' }
+    ],
+    options: [
+      ['color', "'#ece6d6'", 'Paper colour — both sides, or the reverse when content is printed.'],
+      ['content', 'false', "Keep the element's content printed on the plane."],
+      ['paper', "'auto'", 'Sheet colour behind content. auto = element background, cream when transparent.'],
+      ['pad', "'auto'", 'Paper margin around content. auto = 20px when the element has no background.'],
+      ['scale', '1', 'Plane size in flight, relative to the folded sheet.'],
+      ['keel', '0.13', 'Keel depth as a fraction of sheet height.'],
+      ['dihedral', '8', 'Wing tilt in degrees.'],
+      ['arc', '0.5', 'Flight arc height, fraction of distance / viewport.'],
+      ['roll', '0.3', 'Bank sway while flying.'],
+      ['rolls', '0', 'Full barrel rolls during flight.'],
+      ['loops', '0', 'Loop-the-loops during flight. Progress along the arc pauses while each loop flies.'],
+      ['loopSize', '1', 'Loop radius multiplier.'],
+      ['meander', '0', 'Sine-wave weaves across the flight path, in cycles.'],
+      ['meanderSize', '60', 'Meander amplitude in px. Tapers to zero at both ends.'],
+      ['wobble', '0', 'Cosine roll wobble about the length axis, in cycles.'],
+      ['wobbleAngle', '20', 'Wobble amplitude in degrees.'],
+      ['lift', '60', 'px the paper rises toward the viewer while folding.'],
+      ['shade', '0.7', 'Facet shading strength.'],
+      ['grain', '0.35', 'Paper grain strength.'],
+      ['creases', 'true', 'Draw crease lines.'],
+      ['crease', "'rgba(0,0,0,.22)'", 'Crease line colour.'],
+      ['shadow', 'true', 'Drop shadow while the paper is lifted.'],
+      ['perspective', '1100', 'Perspective distance in px.'],
+      ['ease', "'inOut'", 'Per-fold ease: inOut | out | in | linear | sine | function(t).'],
+      ['hideContent', 'true', 'Hide real from / to content while the morph runs.'],
+      ['zIndex', '45', 'Stacking order of the paper layer.'],
+      ['respectReducedMotion', 'true', 'Cross-fades instead when the OS asks for reduced motion.']
+    ].map(([key, def, desc]) => ({ key, def, desc })),
+    demo: {
+      create(OM, opts, els) {
+        const om = OM.create(opts);
+        const m = om.morph({ from: els.from, to: els.to });
+        return { progress: p => m.progress(p), invalidate: () => m.invalidate(), phases: () => m.phases(), destroy: () => om.destroy() };
+      }
+    }
+  }];
+
+  state = { active: 'particle-morph', vals: null, p: 0.42, tab: 'usage', fromText: 'SIGNAL', toText: 'RECEIVED', source: '', copied: false, playing: false, scene: 'text', layout: 'h', image: (() => { try { return localStorage.getItem('motionlab.image') || ''; } catch (e) { return ''; } })() };
+  fromRef = React.createRef();
+  toRef = React.createRef();
+  fileRef = React.createRef();
+
+  get fx() { return this.EFFECTS.find(e => e.id === this.state.active); }
+
+  defaults(fx) {
+    const v = {};
+    fx.controls.forEach(c => { v[c.key] = c.demoDef !== undefined ? c.demoDef : c.def; });
+    Object.keys(fx.demoStart || {}).forEach(k => { if (k in v) v[k] = fx.demoStart[k]; });
+    return v;
+  }
+
+  componentDidMount() {
+    const s = this.state; this._last = { scene: s.scene, image: s.image, fromText: s.fromText, toText: s.toText, layout: s.layout }; this.load(s.active);
+    this.onScroll = () => { if (this.state.layout === 'v' && !this.state.playing) this.scrollSync(); };
+    window.addEventListener('scroll', this.onScroll, { passive: true, capture: true });
+  }
+  componentWillUnmount() { cancelAnimationFrame(this.raf); window.removeEventListener('scroll', this.onScroll, { capture: true }); if (this.ctrl) this.ctrl.destroy(); }
+  // Vertical layout: progress follows the page scroll.
+  scrollSync() {
+    const a = this.fromRef.current, b = this.toRef.current; if (!a || !b) return;
+    // Scroll keyframes: start folding when the origin is at 70% of the viewport, be a plane by 25%,
+    // fly while the page scrolls, touch down once the destination is fully in view, finish unfolding at 50%.
+    const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(), VH = innerHeight, ca = ra.top + ra.height / 2, cb = rb.top + rb.height / 2;
+    const ph = (this.ctrl && this.ctrl.phases) ? this.ctrl.phases() : { fold: 0.38, land: 0.62 };
+    const K = [ca - VH * 0.7, ca - VH * 0.25, rb.bottom - (VH - 24), cb - VH * 0.5], P = [0, ph.fold, ph.land, 1];
+    // Keyframes as page-scroll offsets, clamped to the reachable range so p is 0 at the top of the page and 1 at the bottom.
+    const se = document.scrollingElement || document.documentElement, y = se.scrollTop, maxY = Math.max(1, se.scrollHeight - innerHeight);
+    for (let i = 0; i < 4; i++) K[i] = Math.min(maxY - (3 - i), Math.max(i, y + K[i])) - y;
+    for (let i = 1; i < 4; i++) K[i] = Math.max(K[i], K[i - 1] + 1);
+    let p = 1;
+    if (K[0] >= 0) p = 0;
+    else for (let i = 0; i < 3; i++) if (K[i + 1] >= 0) { p = P[i] + (P[i + 1] - P[i]) * (-K[i]) / (K[i + 1] - K[i]); break; }
+    if (Math.abs(p - this.state.p) > 0.0005) this.setP(p);
+  }
+  componentDidUpdate() {
+    const s = this.state, prev = this._last || s;
+    this._last = { scene: s.scene, image: s.image, fromText: s.fromText, toText: s.toText, layout: s.layout };
+    if (prev.layout !== s.layout && this.ctrl) { this.ctrl.invalidate(); if (s.layout === 'v') this.scrollSync(); else this.ctrl.progress(s.p); }
+    if (prev.scene !== s.scene || prev.image !== s.image) {
+      if (this.ctrl) { this.ctrl.destroy(); this.ctrl = null; }
+      setTimeout(() => { if (window[this.fx.global]) this.init(); }, 60);
+      return;
+    }
+    if (this.ctrl && (prev.fromText !== this.state.fromText || prev.toText !== this.state.toText)) {
+      this.ctrl.invalidate(); this.ctrl.progress(this.state.p);
+    }
+  }
+
+  load(id) {
+    const fx = this.EFFECTS.find(e => e.id === id);
+    cancelAnimationFrame(this.raf);
+    if (this.ctrl) { this.ctrl.destroy(); this.ctrl = null; }
+    this.setState({ active: id, vals: this.defaults(fx), source: '', playing: false }, () => {
+      if (window[fx.global]) this.init();
+      else {
+        const s = document.createElement('script');
+        s.src = fx.file; s.onload = () => this.init();
+        document.head.appendChild(s);
+      }
+    });
+    fetch(fx.file).then(r => r.text()).then(source => { if (this.state.active === id) this.setState({ source }); }).catch(() => {});
+  }
+
+  opts() {
+    const fx = this.fx, o = Object.assign({}, fx.demoStart, this.state.vals);
+    if (fx.palette) o.colors = fx.palette;
+    return o;
+  }
+
+  init() {
+    const fx = this.fx, PM = window[fx.global];
+    if (!PM || !this.fromRef.current) return;
+    if (this.ctrl) this.ctrl.destroy();
+    this.ctrl = fx.demo.create(PM, this.opts(), { from: this.fromRef.current, to: this.toRef.current });
+    this.ctrl.progress(this.state.p);
+  }
+
+  setVal(k, v) {
+    this.setState(s => ({ vals: Object.assign({}, s.vals, { [k]: v }) }), () => this.init());
+  }
+
+  setP(p) { this.setState({ p }); if (this.ctrl) this.ctrl.progress(p); }
+
+  play() {
+    if (!this.ctrl) return;
+    const dur = this.props.playDuration ?? 2400, start = this.state.p >= 0.999 ? 0 : this.state.p, t0 = performance.now();
+    this.setState({ playing: true });
+    const tick = now => {
+      const k = Math.min(1, (now - t0) / (dur * (1 - start)));
+      this.setP(start + (1 - start) * k);
+      if (k < 1) this.raf = requestAnimationFrame(tick); else this.setState({ playing: false });
+    };
+    this.raf = requestAnimationFrame(tick);
+  }
+
+  intro() {
+    if (!this.ctrl || !this.ctrl.intro) return;
+    this.setState({ p: 1, playing: true });
+    this.ctrl.intro((this.props.playDuration ?? 2400) * 1.25).then(() => this.setState({ playing: false }));
+  }
+
+  fmt(v) { return typeof v === 'string' ? "'" + v + "'" : JSON.stringify(v); }
+
+  snippet() {
+    const fx = this.fx, vals = this.state.vals || {}, T = 'scr' + 'ipt';
+    const lines = fx.controls.filter(c => vals[c.key] !== c.def && !(c.def === null && vals[c.key] === c.demoDef)).map(c => c.key + ': ' + this.fmt(vals[c.key]));
+    if (vals.colorMode === 'palette' && fx.palette) lines.push('colors: ' + JSON.stringify(fx.palette).replace(/"/g, "'").replace(/,/g, ', '));
+    Object.keys(fx.demoStart || {}).forEach(k => { if (!fx.controls.some(c => c.key === k)) lines.push(k + ': ' + this.fmt(fx.demoStart[k])); });
+    const cfg = lines.length ? '{\n    ' + lines.join(',\n    ') + '\n  }' : '';
+    return '<' + T + ' src="' + fx.filename + '"></' + T + '>\n<' + T + '>\n  const ' + fx.varName + ' = ' + fx.global + '.create(' + cfg + ');\n  ' + fx.usageCall + '\n</' + T + '>';
+  }
+
+  renderVals() {
+    const fx = this.fx, vals = this.state.vals || {}, s = this.state;
+    const controls = fx.controls.map(c => {
+      const value = vals[c.key];
+      return {
+        label: c.label || c.key, value, options: c.options, min: c.min, max: c.max, step: c.step,
+        display: c.type === 'range' ? (c.step < 1 ? Number(value).toFixed(2) : String(value)) : '',
+        isSelect: c.type === 'select', isRange: c.type === 'range', isSwitch: c.type === 'switch',
+        onChange: e => this.setVal(c.key, c.type === 'switch' ? e.target.checked : c.type === 'range' ? parseFloat(e.target.value) : e.target.value)
+      };
+    });
+    return {
+      fx,
+      libraryCount: this.EFFECTS.length === 1 ? '1 class' : this.EFFECTS.length + ' classes',
+      effects: this.EFFECTS.map(e => ({
+        name: e.name, version: e.version, tagline: e.tagline,
+        border: e.id === s.active ? 'var(--ng-cyan)' : 'var(--border-default)',
+        glow: e.id === s.active ? 'inset 0 0 0 1px var(--ng-cyan-a20)' : 'none',
+        select: () => { if (e.id !== s.active) this.load(e.id); }
+      })),
+      size: s.source ? (s.source.length / 1024).toFixed(1) + ' KB' : '—',
+      showGrid: this.props.showGrid ?? true,
+      fromRef: this.fromRef, toRef: this.toRef,
+      fromText: s.fromText, toText: s.toText,
+      setFrom: e => this.setState({ fromText: e.target.value }),
+      setTo: e => this.setState({ toText: e.target.value }),
+      p: s.p, pLabel: s.p.toFixed(2), playing: s.playing,
+      scrub: e => { cancelAnimationFrame(this.raf); this.setState({ playing: false }); this.setP(parseFloat(e.target.value)); },
+      play: () => this.play(), intro: () => this.intro(),
+      reset: () => this.setState({ vals: this.defaults(fx), fromText: 'SIGNAL', toText: 'RECEIVED' }, () => this.init()),
+      controls,
+      scenes: [['text', 'Text'], ['card', 'Card'], ['image', 'Image']].map(([id, label]) => ({ label, variant: s.scene === id ? 'outline' : 'ghost', select: () => this.setState({ scene: id }) })),
+      layouts: [['h', 'Horizontal', 'arrow-right'], ['v', 'Vertical', 'arrow-down']].map(([id, label, icon]) => ({ label, icon, variant: s.layout === id ? 'outline' : 'ghost', select: () => this.setState({ layout: id }) })),
+      stageDir: s.layout === 'v' ? 'column' : 'row', stageWrap: s.layout === 'v' ? 'nowrap' : 'wrap',
+      stageAlign: s.layout === 'v' ? 'flex-start' : 'center', stageMinH: s.layout === 'v' ? '160vh' : '400px',
+      isCardScene: s.scene === 'card', isImageScene: s.scene === 'image',
+      isTextFrom: s.scene === 'text', isTextTo: s.scene !== 'card',
+      hasImage: !!s.image, noImage: !s.image,
+      imgRef: el => { if (el && s.image && el.getAttribute('src') !== s.image) el.setAttribute('src', s.image); },
+      pickLabel: s.image ? 'Replace image' : 'Choose image',
+      fileRef: this.fileRef,
+      pickImage: () => this.fileRef.current && this.fileRef.current.click(),
+      onFile: e => {
+        const f = e.target.files && e.target.files[0]; if (!f) return;
+        const r = new FileReader();
+        r.onload = () => { const url = r.result; try { localStorage.setItem('motionlab.image', url); } catch (err) {} this.setState({ image: url }); };
+        r.readAsDataURL(f); e.target.value = '';
+      },
+      imageLoaded: () => { if (this.ctrl) { this.ctrl.invalidate(); this.ctrl.progress(this.state.p); } },
+      tabs: [{ id: 'usage', label: 'Usage' }, { id: 'options', label: 'Options', count: fx.options.length }, { id: 'source', label: 'Source' }],
+      tab: s.tab, setTab: id => this.setState({ tab: id }),
+      isUsage: s.tab === 'usage', isOptions: s.tab === 'options', isSource: s.tab === 'source',
+      snippet: this.snippet(), source: s.source || 'Loading…',
+      copyLabel: s.copied ? 'Copied' : 'Copy snippet',
+      copySnippet: () => { navigator.clipboard && navigator.clipboard.writeText(this.snippet()); this.setState({ copied: true }); setTimeout(() => this.setState({ copied: false }), 1600); },
+      download: () => { const a = document.createElement('a'); a.href = fx.file; a.download = fx.filename; document.body.appendChild(a); a.click(); a.remove(); }
+    };
+  }
+}
+</script>
+</body>
+</html>

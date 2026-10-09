@@ -1,0 +1,23 @@
+:root {
+  --glow-cyan: 0 0 0 1px var(--ng-cyan), 0 0 14px rgba(0, 240, 255, 0.55), 0 0 36px rgba(0, 240, 255, 0.22);
+  --glow-magenta: 0 0 0 1px var(--ng-magenta), 0 0 14px rgba(255, 43, 214, 0.55), 0 0 36px rgba(255, 43, 214, 0.22);
+  --glow-soft-cyan: 0 0 24px rgba(0, 240, 255, 0.18);
+  --glow-soft-magenta: 0 0 24px rgba(255, 43, 214, 0.18);
+  --glow-text-cyan: 0 0 6px rgba(0, 240, 255, 0.75), 0 0 18px rgba(0, 240, 255, 0.35);
+  --glow-text-magenta: 0 0 6px rgba(255, 43, 214, 0.75), 0 0 18px rgba(255, 43, 214, 0.35);
+  --shadow-overlay: 0 18px 48px rgba(0, 0, 0, 0.7);
+
+  --chamfer-md: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px)); /* @kind other */
+  --chamfer-sm: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); /* @kind other */
+
+  --pattern-grid: linear-gradient(rgba(0, 240, 255, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.06) 1px, transparent 1px); /* @kind other */
+  --pattern-grid-size: 32px 32px; /* @kind other */
+  --pattern-scanlines: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px); /* @kind other */
+  --gradient-signal: linear-gradient(90deg, var(--ng-cyan), var(--ng-magenta)); /* @kind color */
+  --blur-overlay: blur(6px); /* @kind other */
+}
+.ng-bg-grid { background-color: var(--bg-app); background-image: var(--pattern-grid); background-size: var(--pattern-grid-size); }
+.ng-scanlines { position: relative; }
+.ng-scanlines::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--pattern-scanlines); }
+.ng-glow-cyan { color: var(--ng-cyan); text-shadow: var(--glow-text-cyan); }
+.ng-glow-magenta { color: var(--ng-magenta); text-shadow: var(--glow-text-magenta); }

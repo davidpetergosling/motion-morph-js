@@ -1,0 +1,19 @@
+# Packaged copies of the project
+*.zip
+
+# Design tool files
+.thumbnail
+uploads/
+
+# Dependencies and logs
+node_modules/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor settings
+.vscode/
+.idea/

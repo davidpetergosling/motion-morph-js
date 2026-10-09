@@ -1,0 +1,55 @@
+:root {
+  /* Base — void & surfaces (cool, blue-black) */
+  --ng-void: #05050a;
+  --ng-bg: #08080f;
+  --ng-surface-1: #0e0e1a;
+  --ng-surface-2: #151526;
+  --ng-surface-3: #1d1d33;
+  --ng-line: #262642;
+  --ng-line-strong: #3a3a62;
+
+  /* Accents */
+  --ng-cyan: #00f0ff;
+  --ng-cyan-deep: #00a8c2;
+  --ng-cyan-a10: rgba(0, 240, 255, 0.10);
+  --ng-cyan-a20: rgba(0, 240, 255, 0.20);
+  --ng-cyan-a40: rgba(0, 240, 255, 0.40);
+  --ng-cyan-a60: rgba(0, 240, 255, 0.60);
+  --ng-magenta: #ff2bd6;
+  --ng-magenta-deep: #b8139a;
+  --ng-magenta-a10: rgba(255, 43, 214, 0.10);
+  --ng-magenta-a20: rgba(255, 43, 214, 0.20);
+  --ng-magenta-a40: rgba(255, 43, 214, 0.40);
+  --ng-magenta-a60: rgba(255, 43, 214, 0.60);
+
+  /* Text */
+  --ng-white: #f5f7ff;
+  --ng-fg-2: #b6bbd8;
+  --ng-fg-3: #7d82a8;
+  --ng-fg-disabled: #4a4e70;
+
+  /* Semantic */
+  --ng-success: #3dff9a;
+  --ng-warning: #ffd23f;
+  --ng-danger: #ff3b5c;
+  --ng-info: var(--ng-cyan);
+
+  /* Semantic aliases */
+  --bg-app: var(--ng-bg);
+  --surface-sunken: var(--ng-void);
+  --surface-card: var(--ng-surface-1);
+  --surface-raised: var(--ng-surface-2);
+  --surface-overlay: var(--ng-surface-3);
+  --border-default: var(--ng-line);
+  --border-strong: var(--ng-line-strong);
+  --text-primary: var(--ng-white);
+  --text-secondary: var(--ng-fg-2);
+  --text-muted: var(--ng-fg-3);
+  --text-disabled: var(--ng-fg-disabled);
+  --text-on-accent: var(--ng-void);
+  --accent-primary: var(--ng-cyan);
+  --accent-secondary: var(--ng-magenta);
+  --focus-ring: var(--ng-magenta);
+  --link: var(--ng-cyan);
+  --link-hover: var(--ng-magenta);
+}

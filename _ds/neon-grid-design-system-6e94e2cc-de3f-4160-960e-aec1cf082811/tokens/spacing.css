@@ -1,0 +1,27 @@
+:root {
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+
+  --radius-0: 0px;
+  --radius-1: 2px;
+  --radius-2: 4px;
+  --radius-pill: 999px;
+  --cut-sm: 8px; /* @kind radius */
+  --cut-md: 14px; /* @kind radius */
+  --cut-lg: 24px; /* @kind radius */
+
+  --control-h-sm: 32px; /* @kind spacing */
+  --control-h-md: 40px; /* @kind spacing */
+  --control-h-lg: 48px; /* @kind spacing */
+  --content-max: 1280px; /* @kind spacing */
+}

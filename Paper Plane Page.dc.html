@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/motion.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/tokens/components.css">
+  <link rel="stylesheet" href="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/styles.css">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="_ds/neon-grid-design-system-6e94e2cc-de3f-4160-960e-aec1cf082811/_ds_bundle.js"></script>
+  <script src="./image-slot.js"></script>
+  <script src="effects/origami-morph.js"></script>
+  <style>
+    body { margin: 0; background: var(--bg-app); }
+    a { color: var(--link); }
+    a:hover { color: var(--link-hover); }
+  </style>
+</helmet>
+<div style="min-height: 100vh; background: var(--bg-app); background-image: var(--pattern-grid); background-size: 32px 32px; color: var(--text-primary); font-family: var(--font-body);">
+  <header style="height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 32px; border-bottom: 1px solid var(--border-default); background: var(--ng-void);">
+    <div style="font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: 0.08em; display: flex; gap: 2px;">
+      <span style="color: var(--ng-cyan); text-shadow: 0 0 14px var(--ng-cyan-a60);">MOTION</span>
+      <span style="color: var(--ng-white);">/</span>
+      <span style="color: var(--ng-magenta); text-shadow: 0 0 14px var(--ng-magenta-a60);">LAB</span>
+    </div>
+    <a href="Motion Lab.dc.html" style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; white-space: nowrap;">// Back to library</a>
+  </header>
+
+  <main style="max-width: 760px; margin: 0 auto; padding: 64px 24px 0; box-sizing: border-box; display: flex; flex-direction: column;">
+    <section ref="{{ aRef }}" data-screen-label="Dispatch" style="box-sizing: border-box; padding: 40px; display: flex; flex-direction: column; gap: 16px; background: var(--surface-card); border: 1px solid var(--ng-cyan-a60); clip-path: var(--chamfer-md);">
+      <span style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--ng-cyan);">// 01 — DISPATCH</span>
+      <h1 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(36px, 6vw, 56px); line-height: 1; letter-spacing: 0.04em; text-transform: uppercase;">Send the signal</h1>
+      <p style="margin: 0; font-size: 17px; line-height: 1.6; color: var(--text-secondary); text-wrap: pretty;">This panel is a sheet of paper. Its corners fold to the centre, then its edges, then the keel and wings, and it takes off down the page.</p>
+      <div style="display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ng-cyan);">
+        <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Icon" name="arrow-down" size="16" hint-size="16px,16px"></x-import>
+        <span>Scroll to fold and launch</span>
+      </div>
+    </section>
+
+    <article data-screen-label="In transit" style="padding: 120px 0 140px; display: flex; flex-direction: column; gap: 28px;">
+      <span style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--text-muted);">// IN TRANSIT</span>
+      <h2 style="margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 32px; line-height: 1.1; letter-spacing: 0.04em; text-transform: uppercase;">Between two sections</h2>
+      <p style="margin: 0; font-size: 17px; line-height: 1.7; color: var(--text-secondary); text-wrap: pretty;">The plane is drawn on a fixed layer above the page, so it flies over everything in between: copy, images, anything. Its flight is clamped to the viewport, so it never leaves the screen while the next section is still below.</p>
+      <div style="width: 100%; height: 380px;">
+        <image-slot id="plane-page-image" shape="rect" placeholder="Drop an image for the middle section"></image-slot>
+      </div>
+      <p style="margin: 0; font-size: 17px; line-height: 1.7; color: var(--text-secondary); text-wrap: pretty;">Progress is tied to your scroll position. Scroll back up and the whole flight runs in reverse: the plane returns, unfolds, and the first section reappears.</p>
+      <p style="margin: 0; font-size: 17px; line-height: 1.7; color: var(--text-secondary); text-wrap: pretty;">The plane only touches down once the destination is fully in view, then unfolds into it as you keep scrolling.</p>
+    </article>
+
+    <section ref="{{ bRef }}" data-screen-label="Received" style="box-sizing: border-box; padding: 40px; display: flex; flex-direction: column; gap: 16px; background: var(--surface-card); border: 1px solid var(--ng-magenta-a60); clip-path: var(--chamfer-md);">
+      <span style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--ng-magenta);">// 02 — RECEIVED</span>
+      <h2 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(36px, 6vw, 56px); line-height: 1; letter-spacing: 0.04em; text-transform: uppercase;">Signal received</h2>
+      <p style="margin: 0; font-size: 17px; line-height: 1.6; color: var(--text-secondary); text-wrap: pretty;">The plane landed and unfolded into this panel. Same paper, new content.</p>
+      <div style="display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ng-magenta);">
+        <x-import component-from-global-scope="NeonGridDesignSystem_6e94e2.Icon" name="arrow-up" size="16" hint-size="16px,16px"></x-import>
+        <span>Scroll up to send it back</span>
+      </div>
+    </section>
+    <div style="height: 50vh;"></div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;planeScale&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.4,&quot;min&quot;:0.2,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Plane&quot;},&quot;loops&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:3,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Plane&quot;},&quot;printContent&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Plane&quot;}}">
+class Component extends DCLogic {
+  aRef = React.createRef();
+  bRef = React.createRef();
+
+  componentDidMount() {
+    this.onScroll = () => this.sync();
+    this.onResize = () => { if (this.m) this.m.invalidate(); this.sync(); };
+    addEventListener('scroll', this.onScroll, { passive: true, capture: true });
+    addEventListener('resize', this.onResize);
+    const go = () => { if (!window.OrigamiMorph || !this.aRef.current) { this.t = setTimeout(go, 50); return; } this.build(); };
+    go();
+    // Re-sync once layout, fonts and images settle (page height changes move the scroll keyframes).
+    this.onLoad = () => this.onResize();
+    addEventListener('load', this.onLoad);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.onResize());
+    if (window.ResizeObserver) { this.ro = new ResizeObserver(() => this.onResize()); this.ro.observe(document.documentElement); }
+  }
+  componentWillUnmount() {
+    clearTimeout(this.t);
+    removeEventListener('scroll', this.onScroll, { capture: true });
+    removeEventListener('resize', this.onResize);
+    removeEventListener('load', this.onLoad);
+    if (this.ro) this.ro.disconnect();
+    if (this.om) this.om.destroy();
+  }
+  componentDidUpdate() {
+    const key = JSON.stringify(this.opts());
+    if (this.om && key !== this.key) this.build();
+  }
+  opts() {
+    return {
+      scale: this.props.planeScale ?? 0.4,
+      loops: this.props.loops ?? 0,
+      content: this.props.printContent ?? false,
+      crease: 'rgba(0,168,194,.55)'
+    };
+  }
+  build() {
+    if (this.om) this.om.destroy();
+    const o = this.opts(); this.key = JSON.stringify(o);
+    this.om = OrigamiMorph.create(o);
+    this.m = this.om.morph({ from: this.aRef.current, to: this.bRef.current });
+    this.sync();
+  }
+  // Scroll keyframes: fold as section 1 rises, fly over the middle, touch down once section 2 is fully in view, unfold by mid-screen.
+  sync() {
+    const a = this.aRef.current, b = this.bRef.current; if (!a || !b || !this.m) return;
+    const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(), VH = innerHeight, ca = ra.top + ra.height / 2, cb = rb.top + rb.height / 2;
+    const ph = this.m.phases();
+    const K = [ca - VH * 0.6, ca - VH * 0.2, rb.bottom - (VH - 24), cb - VH * 0.5], P = [0, ph.fold, ph.land, 1];
+    const se = document.scrollingElement || document.documentElement, y = se.scrollTop, maxY = Math.max(1, se.scrollHeight - VH);
+    if (!VH || se.scrollHeight <= VH) { this.m.progress(0); return; }
+    for (let i = 0; i < 4; i++) K[i] = Math.min(maxY - (3 - i), Math.max(i, y + K[i])) - y;
+    for (let i = 1; i < 4; i++) K[i] = Math.max(K[i], K[i - 1] + 1);
+    let p = 1;
+    if (K[0] >= 0) p = 0;
+    else for (let i = 0; i < 3; i++) if (K[i + 1] >= 0) { p = P[i] + (P[i + 1] - P[i]) * (-K[i]) / (K[i + 1] - K[i]); break; }
+    this.m.progress(p);
+  }
+  renderVals() {
+    return { aRef: this.aRef, bRef: this.bRef };
+  }
+}
+</script>
+</body>
+</html>
